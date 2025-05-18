@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -17,10 +18,11 @@ type Route struct {
 }
 
 // App is the application container that holds:
-// - Shared dependencies
+// - Shared dependencies (Configuration)
 // - Registered HTTP routes
 // - Thread-safe synchronization
 type App struct {
+	Config *config.Configuration
 	routes []Route
 	mu     sync.RWMutex
 }
@@ -40,6 +42,11 @@ func Get() *App {
 	})
 
 	return instance
+}
+
+// SetConfig attributes a *config.Configuration as the app Config.
+func (a *App) SetConfig(cfg *config.Configuration) {
+	a.Config = cfg
 }
 
 // SetupRouter initializes an http.Handler with all registered routes.
