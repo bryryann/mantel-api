@@ -1,3 +1,5 @@
+// Package app provides the application dependency injection container
+// and configuration registration system.
 package app
 
 import (
@@ -7,22 +9,29 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Route represents a registered HTTP route, containing it's handler and method.
 type Route struct {
-	Path    string
-	Method  string
-	Handler http.HandlerFunc
+	Path    string           // URL Path pattern
+	Method  string           // HTTP Method(GET, POST, etc)
+	Handler http.HandlerFunc // Handler function for this route.
 }
 
+// App is the application container that holds:
+// - Shared dependencies
+// - Registered HTTP routes
+// - Thread-safe synchronization
 type App struct {
 	routes []Route
 	mu     sync.RWMutex
 }
 
 var (
-	instance *App
-	once     sync.Once
+	instance *App      // Singleton instance.
+	once     sync.Once // Ensures singleton initialization happens once.
 )
 
+// Get returns the singleton App instance, initializing it if necessary.
+// Concurrent-safe.
 func Get() *App {
 	once.Do(func() {
 		instance = &App{
@@ -33,6 +42,7 @@ func Get() *App {
 	return instance
 }
 
+// SetupRouter initializes an http.Handler with all registered routes.
 func (a *App) SetupRouter() http.Handler {
 	router := httprouter.New()
 	a.mu.RLock()

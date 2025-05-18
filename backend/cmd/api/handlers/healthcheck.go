@@ -1,17 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
-
-	"github.com/bryryann/mantel/backend/cmd/api/app"
 )
 
-func init() {
-	app := app.Get()
-
-	app.RegisterHandler(http.MethodGet, "/v1/healthcheck", HealthCheck)
-}
-
+// HealthCheck handles GET /v1/healthcheck requests.
+// Returns 200 OK with {"status": "ok"} when healthy.
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Mantel version 0.0.1"))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
