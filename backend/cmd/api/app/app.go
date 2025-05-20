@@ -55,6 +55,7 @@ func (a *App) SetConfig(cfg *config.Configuration) {
 	a.Config = cfg
 }
 
+// SetDB opens a sql connection and attributes a *database.Database to the app.
 func (a *App) SetDB(dsn string) error {
 	db, err := database.OpenConnection(dsn)
 	if err != nil {
@@ -65,6 +66,7 @@ func (a *App) SetDB(dsn string) error {
 	return nil
 }
 
+// ConfigureLogger sets the global application logger.
 func (a *App) ConfigureLogger(logLevel string) {
 	var level slog.Level
 	switch logLevel {

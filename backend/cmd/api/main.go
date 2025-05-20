@@ -46,6 +46,7 @@ func main() {
 	startServer()
 }
 
+// startServer contains all code related to api initialization.
 func startServer() {
 	application := app.Get()
 	router := application.SetupRouter()

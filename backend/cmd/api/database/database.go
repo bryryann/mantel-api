@@ -6,10 +6,13 @@ import (
 	"time"
 )
 
+// Database holds db related variables used by the application.
 type Database struct {
 	db *sql.DB
 }
 
+// OpenConnection initializes a connection to PostgreSQL db, as well as
+// setting up db connection configurations.
 func OpenConnection(dsn string) (*Database, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
