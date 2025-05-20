@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -31,6 +32,7 @@ func main() {
 	cfg := config.Load()
 
 	app.Get().SetConfig(cfg)
+	app.Get().ConfigureLogger("info")
 
 	startServer()
 }
@@ -39,17 +41,17 @@ func startServer() {
 	application := app.Get()
 	router := application.SetupRouter()
 
-	// TODO: Add logger
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", application.Config.Port),
 		Handler:      router,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
+		ErrorLog:     slog.NewLogLogger(application.Logger.Handler(), slog.LevelError),
 	}
 
 	err := srv.ListenAndServe()
 	if err != nil {
-		log.Fatalf("fail: %v", err)
+		application.Logger.Error(err.Error())
 	}
 }

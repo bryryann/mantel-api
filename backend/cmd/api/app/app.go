@@ -3,7 +3,9 @@
 package app
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/bryryann/mantel/backend/cmd/api/config"
@@ -18,11 +20,12 @@ type Route struct {
 }
 
 // App is the application container that holds:
-// - Shared dependencies (Configuration)
+// - Shared dependencies (Configuration, Logger)
 // - Registered HTTP routes
 // - Thread-safe synchronization
 type App struct {
 	Config *config.Configuration
+	Logger *slog.Logger
 	routes []Route
 	mu     sync.RWMutex
 }
@@ -47,6 +50,29 @@ func Get() *App {
 // SetConfig attributes a *config.Configuration as the app Config.
 func (a *App) SetConfig(cfg *config.Configuration) {
 	a.Config = cfg
+}
+
+func (a *App) ConfigureLogger(logLevel string) {
+	var level slog.Level
+	switch logLevel {
+	case "debug":
+		level = slog.LevelDebug
+	case "info":
+		level = slog.LevelInfo
+	case "warn":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+
+	opts := &slog.HandlerOptions{
+		Level: level,
+	}
+	handler := slog.NewTextHandler(os.Stdout, opts)
+
+	a.Logger = slog.New(handler)
 }
 
 // SetupRouter initializes an http.Handler with all registered routes.
