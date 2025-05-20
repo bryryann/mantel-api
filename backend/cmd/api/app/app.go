@@ -3,12 +3,14 @@
 package app
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"sync"
 
 	"github.com/bryryann/mantel/backend/cmd/api/config"
+	"github.com/bryryann/mantel/backend/cmd/api/database"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -24,10 +26,11 @@ type Route struct {
 // - Registered HTTP routes
 // - Thread-safe synchronization
 type App struct {
-	Config *config.Configuration
-	Logger *slog.Logger
-	routes []Route
-	mu     sync.RWMutex
+	Config   *config.Configuration
+	Database *database.Database
+	Logger   *slog.Logger
+	routes   []Route
+	mu       sync.RWMutex
 }
 
 var (
@@ -50,6 +53,16 @@ func Get() *App {
 // SetConfig attributes a *config.Configuration as the app Config.
 func (a *App) SetConfig(cfg *config.Configuration) {
 	a.Config = cfg
+}
+
+func (a *App) SetDB(dsn string) error {
+	db, err := database.OpenConnection(dsn)
+	if err != nil {
+		return fmt.Errorf("failed to create db connection: %w", err)
+	}
+
+	a.Database = db
+	return nil
 }
 
 func (a *App) ConfigureLogger(logLevel string) {

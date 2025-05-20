@@ -10,7 +10,9 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	_ "github.com/bryryann/mantel/backend/cmd/api/handlers"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 const ascii = `
@@ -29,10 +31,17 @@ func init() {
 func main() {
 	fmt.Println(ascii)
 
+	dsn := helpers.GetEnvString("MANTEL_DB_DSN", "")
+	if dsn == "" {
+		panic("invalid db dsn\n")
+	}
+	application := app.Get()
+
 	cfg := config.Load()
 
-	app.Get().SetConfig(cfg)
-	app.Get().ConfigureLogger("info")
+	application.SetConfig(cfg)
+	application.ConfigureLogger("info")
+	application.SetDB(cfg.DSN)
 
 	startServer()
 }

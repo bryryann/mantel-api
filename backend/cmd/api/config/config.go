@@ -4,15 +4,16 @@ package config
 
 import (
 	"log"
-	"os"
-	"strconv"
 	"sync"
+
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 )
 
 // Configuration holds the values used to setup the application
 type Configuration struct {
 	Port int    // Port in which the API will be hosted.
 	Env  string // Current application environment (DEVELOPMENT, PRODUCTION, etc).
+	DSN  string
 }
 
 var (
@@ -23,15 +24,21 @@ var (
 // Load returns a singleton Configuration instance, initializing it if necessary
 // and defining it's default values.
 func Load() *Configuration {
-	port, err := strconv.Atoi(os.Getenv("PORT"))
-	if err != nil {
-		log.Fatalf("Invalid PORT value: %v", err)
-	}
-
 	once.Do(func() {
+		port, err := helpers.GetEnvInt("PORT", 4000)
+		if err != nil {
+			log.Fatalf("Invalid PORT value: %v", err)
+		}
+
+		dsn := helpers.GetEnvString("MANTEL_DB_DSN", "")
+		if dsn == "" {
+			log.Fatal("Empty database dsn string\n")
+		}
+
 		instance = &Configuration{
 			Port: port,
-			Env:  os.Getenv("ENVIRONMENT"),
+			Env:  helpers.GetEnvString("ENVIRONMENT", "DEVELOPMENT"),
+			DSN:  dsn,
 		}
 	})
 
