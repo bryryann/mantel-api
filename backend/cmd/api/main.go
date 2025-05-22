@@ -39,9 +39,13 @@ func main() {
 
 	cfg := config.Load()
 
-	application.SetConfig(cfg)
 	application.ConfigureLogger("info")
+
+	application.SetConfig(cfg)
 	application.SetDB(cfg.DSN)
+	application.SetModels()
+
+	application.Logger.Info("all set up!")
 
 	startServer()
 }

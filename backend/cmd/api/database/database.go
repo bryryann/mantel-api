@@ -8,7 +8,7 @@ import (
 
 // Database holds db related variables used by the application.
 type Database struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 // OpenConnection initializes a connection to PostgreSQL db, as well as
@@ -31,5 +31,5 @@ func OpenConnection(dsn string) (*Database, error) {
 		return nil, err
 	}
 
-	return &Database{db: db}, nil
+	return &Database{DB: db}, nil
 }

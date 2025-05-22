@@ -11,6 +11,7 @@ import (
 
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/bryryann/mantel/backend/cmd/api/database"
+	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -29,6 +30,7 @@ type App struct {
 	Config   *config.Configuration
 	Database *database.Database
 	Logger   *slog.Logger
+	Models   *data.Models
 	routes   []Route
 	mu       sync.RWMutex
 }
@@ -64,6 +66,15 @@ func (a *App) SetDB(dsn string) error {
 
 	a.Database = db
 	return nil
+}
+
+func (a *App) SetModels() {
+	if a.Database == nil {
+		a.Logger.Error("failed to set models. no proper database")
+		return
+	}
+
+	a.Models = data.NewModels(a.Database.DB)
 }
 
 // ConfigureLogger sets the global application logger.
