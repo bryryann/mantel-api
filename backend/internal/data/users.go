@@ -10,11 +10,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// ErrDuplicateEmail is returned when an attempt is made to create or update
+// a user with an email address that already exists in the database.
+//
+// AnonymousUser is a sentinel value used to represent an unauthenticated or guest user.
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 	AnonymousUser     = &User{}
 )
 
+// User represents a user in the system.
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -24,15 +29,25 @@ type User struct {
 	Version   int       `json:"-"`
 }
 
+// IsAnonymous returns true if the user is the predefined AnonymousUser.
+// This is used to check if the current user is unauthenticated.
 func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
+// password represents a user's password, including both the plaintext version
+// (used temporarily and never stored) and the hashed version (stored securely).
 type password struct {
+	// plaintext holds the plaintext password temporarily.
+	// This should be nil except during creation or validation.
 	plaintext *string
-	hash      []byte
+
+	// hash contains the securely hashed version of the password.
+	hash []byte
 }
 
+// Set generates a secure hash from the given plaintext password
+// and stores both the plaintext and the hash within the struct.
 func (p *password) Set(plaintextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plaintextPassword), 12)
 	if err != nil {
@@ -45,6 +60,8 @@ func (p *password) Set(plaintextPassword string) error {
 	return nil
 }
 
+// Matches checks whether the provided plaintext password matches
+// the stored hash in the password struct.
 func (p *password) Matches(plaintextPassword string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plaintextPassword))
 	if err != nil {
@@ -59,10 +76,13 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 	return true, nil
 }
 
+// UserModel serves as a wrapper to a SQL database connection and provides
+// methods for performing CRUD operations on user records.
 type UserModel struct {
 	DB *sql.DB
 }
 
+// Insert adds a new user record to the database.
 func (m UserModel) Insert(user *User) error {
 	query := `
 		INSERT INTO users (username, email, password_hash)
@@ -87,6 +107,7 @@ func (m UserModel) Insert(user *User) error {
 	return nil
 }
 
+// Get retrieves a user from the database by their unique ID.
 func (m UserModel) Get(userId int64) (*User, error) {
 	query := `
 		SELECT id, created_at, username, email, password_hash, version
@@ -118,6 +139,7 @@ func (m UserModel) Get(userId int64) (*User, error) {
 	return &user, nil
 }
 
+// GetByEmail retrieves a user from the database by their email address.
 func (m UserModel) GetByEmail(email string) (*User, error) {
 	query := `
 		SELECT id, created_at, username, email, password_hash, version
@@ -149,6 +171,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
+// Update modifies an existing user record in the database with new data.
 func (m UserModel) Update(user *User) error {
 	query := `
 		UPDATE users
@@ -181,17 +204,23 @@ func (m UserModel) Update(user *User) error {
 	return nil
 }
 
+// ValidateEmail checks whether the provided email string is valid,
+// using methods defined in the validator package.
 func ValidateEmail(v *validator.Validator, email string) {
 	v.Check(email != "", "email", "must be provided")
 	v.Check(validator.Matches(email, validator.EmailRX), "email", "must be a valid email address")
 }
 
+// ValidatePasswordPlaintext checks whether the provided plaintext password
+// meets defined security requirements (e.g. length, character rules).
 func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 	v.Check(password != "", "password", "must be provided")
 	v.Check(len(password) >= 8, "password", "must be at least 8 bytes long")
 	v.Check(len(password) <= 255, "password", "must be no more than 255 bytes long")
 }
 
+// ValidateUser runs validation on a User struct, ensuring all required fields
+// are present and meet defined validation rules.
 func ValidateUser(v *validator.Validator, user *User) {
 	v.Check(user.Username != "", "username", "must be provided")
 	v.Check(len(user.Username) <= 500, "username", "must be no more than 500 bytes long")
