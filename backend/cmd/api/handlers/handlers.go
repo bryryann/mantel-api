@@ -7,5 +7,6 @@ func init() {
 	app := app.Get()
 
 	app.Get("/v1/healthcheck", HealthCheck)
+
 	app.Post("/v1/users", registerUserHandler)
 }
