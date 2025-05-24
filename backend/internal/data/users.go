@@ -15,8 +15,9 @@ import (
 //
 // AnonymousUser is a sentinel value used to represent an unauthenticated or guest user.
 var (
-	ErrDuplicateEmail = errors.New("duplicate email")
-	AnonymousUser     = &User{}
+	ErrDuplicateEmail    = errors.New("duplicate email")
+	ErrDuplicateUsername = errors.New("duplicate username")
+	AnonymousUser        = &User{}
 )
 
 // User represents a user in the system.
@@ -99,6 +100,8 @@ func (m UserModel) Insert(user *User) error {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
+			return ErrDuplicateUsername
 		default:
 			return err
 		}
@@ -195,6 +198,8 @@ func (m UserModel) Update(user *User) error {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
+			return ErrDuplicateUsername
 		// TODO: Add ErrEditConflict custom error.
 		default:
 			return err
