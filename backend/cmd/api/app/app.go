@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/bryryann/mantel/backend/cmd/api/database"
 	"github.com/bryryann/mantel/backend/internal/data"
@@ -31,6 +32,7 @@ type App struct {
 	Database *database.Database
 	Logger   *slog.Logger
 	Models   *data.Models
+	Context  *appcontext.Context
 	routes   []Route
 	mu       sync.RWMutex
 }
@@ -45,7 +47,8 @@ var (
 func Get() *App {
 	once.Do(func() {
 		instance = &App{
-			routes: make([]Route, 0),
+			routes:  make([]Route, 0),
+			Context: &appcontext.Context{},
 		}
 	})
 

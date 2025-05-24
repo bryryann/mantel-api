@@ -14,6 +14,13 @@ type Configuration struct {
 	Port int    // Port in which the API will be hosted.
 	Env  string // Current application environment (DEVELOPMENT, PRODUCTION, etc).
 	DSN  string
+	JWT  JWT
+}
+
+type JWT struct {
+	Secret   string
+	Issuer   string
+	Audience string
 }
 
 var (
@@ -25,20 +32,35 @@ var (
 // and defining it's default values.
 func Load() *Configuration {
 	once.Do(func() {
+		// port
 		port, err := helpers.GetEnvInt("PORT", 4000)
 		if err != nil {
 			log.Fatalf("Invalid PORT value: %v", err)
 		}
 
+		// db
 		dsn := helpers.GetEnvString("MANTEL_DB_DSN", "")
 		if dsn == "" {
 			log.Fatal("Empty database dsn string\n")
+		}
+
+		// jwt
+		secret := helpers.GetEnvString("JWT_SECRET", "")
+		issuer := helpers.GetEnvString("JWT_ISSUER", "")
+		audience := helpers.GetEnvString("JWT_AUDIENCE", "")
+		if secret == "" || issuer == "" || audience == "" {
+			log.Fatal("Missing jwt secret/issuer/audience\n")
 		}
 
 		instance = &Configuration{
 			Port: port,
 			Env:  helpers.GetEnvString("ENVIRONMENT", "DEVELOPMENT"),
 			DSN:  dsn,
+			JWT: JWT{
+				Secret:   secret,
+				Issuer:   issuer,
+				Audience: audience,
+			},
 		}
 	})
 
