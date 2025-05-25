@@ -12,6 +12,8 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/bryryann/mantel/backend/cmd/api/database"
+	"github.com/bryryann/mantel/backend/cmd/api/middleware"
+	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
@@ -28,13 +30,14 @@ type Route struct {
 // - Registered HTTP routes
 // - Thread-safe synchronization
 type App struct {
-	Config   *config.Configuration
-	Database *database.Database
-	Logger   *slog.Logger
-	Models   *data.Models
-	Context  *appcontext.Context
-	routes   []Route
-	mu       sync.RWMutex
+	Config    *config.Configuration
+	Database  *database.Database
+	Logger    *slog.Logger
+	Models    *data.Models
+	Context   *appcontext.Context
+	Responses *responses.Responses
+	routes    []Route
+	mu        sync.RWMutex
 }
 
 var (
@@ -47,8 +50,9 @@ var (
 func Get() *App {
 	once.Do(func() {
 		instance = &App{
-			routes:  make([]Route, 0),
-			Context: &appcontext.Context{},
+			routes:    make([]Route, 0),
+			Context:   &appcontext.Context{},
+			Responses: responses.Get(),
 		}
 	})
 
@@ -115,5 +119,5 @@ func (a *App) SetupRouter() http.Handler {
 	for _, route := range a.routes {
 		router.HandlerFunc(route.Method, route.Path, route.Handler)
 	}
-	return router
+	return middleware.Authenticate(a.Context, &a.Models.Users, router)
 }
