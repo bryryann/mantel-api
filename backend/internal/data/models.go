@@ -1,6 +1,13 @@
 package data
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
+
+var (
+	ErrRecordNotFound = errors.New("record not found")
+)
 
 // Models is a container struct that holds all the individual
 // database models used throughout the application.
