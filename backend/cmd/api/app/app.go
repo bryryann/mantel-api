@@ -119,5 +119,5 @@ func (a *App) SetupRouter() http.Handler {
 	for _, route := range a.routes {
 		router.HandlerFunc(route.Method, route.Path, route.Handler)
 	}
-	return middleware.Authenticate(a.Context, &a.Models.Users, router)
+	return middleware.Apply(a.Context, &a.Models.Users, router)
 }

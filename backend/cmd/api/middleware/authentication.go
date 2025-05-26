@@ -14,7 +14,7 @@ import (
 	"github.com/pascaldekloe/jwt"
 )
 
-func Authenticate(ctx *appcontext.Context, models *data.UserModel, next http.Handler) http.Handler {
+func authenticate(ctx *appcontext.Context, models *data.UserModel, next http.Handler) http.Handler {
 	res := responses.Get()
 	config := config.Load()
 
