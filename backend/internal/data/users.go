@@ -142,19 +142,19 @@ func (m UserModel) Get(userId int64) (*User, error) {
 	return &user, nil
 }
 
-// GetByEmail retrieves a user from the database by their email address.
-func (m UserModel) GetByEmail(email string) (*User, error) {
+// GetByUsername retrieves a user from the database by their username.
+func (m UserModel) GetByUsername(username string) (*User, error) {
 	query := `
 		SELECT id, created_at, username, email, password_hash, version
 		FROM users
-		WHERE email = $1`
+		WHERE username = $1`
 
 	var user User
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := m.DB.QueryRowContext(ctx, query, email).Scan(
+	err := m.DB.QueryRowContext(ctx, query, username).Scan(
 		&user.ID,
 		&user.CreatedAt,
 		&user.Username,
@@ -164,8 +164,9 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	)
 
 	if err != nil {
-		// TODO: Add ErrRecordNotFound custom error
 		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
 		default:
 			return nil, err
 		}
