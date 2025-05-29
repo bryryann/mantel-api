@@ -13,7 +13,7 @@ import (
 
 type envelope map[string]any
 
-// registerUserHandler handles the HTTP request for registering a new user.
+// registerUser handles the HTTP request for registering a new user.
 // It reads the JSON payload from the request, validates the input, and inserts the user into the database.
 func registerUser(w http.ResponseWriter, r *http.Request) {
 	application := app.Get() // Retrieve the application instance.

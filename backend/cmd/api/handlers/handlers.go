@@ -9,5 +9,5 @@ func init() {
 	app.Get("/v1/healthcheck", healthCheck)
 
 	app.Post("/v1/users", registerUser)
-	app.Post("/v1/tokens/authentication", authTokenHandler)
+	app.Post("/v1/tokens/authentication", authenticateToken)
 }
