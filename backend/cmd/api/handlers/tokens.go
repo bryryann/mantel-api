@@ -15,6 +15,9 @@ import (
 	"github.com/pascaldekloe/jwt"
 )
 
+// authTokenHandler handles the generation of authentication tokens for users.
+// It validates the input credentials, checks the user's password, and generates a JWT token
+// if the credentials are valid.
 func authTokenHandler(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	cfg := config.Load()

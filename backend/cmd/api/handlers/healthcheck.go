@@ -7,7 +7,7 @@ import (
 
 // HealthCheck handles GET /v1/healthcheck requests.
 // Returns 200 OK with {"status": "ok"} when healthy.
-func HealthCheck(w http.ResponseWriter, r *http.Request) {
+func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }

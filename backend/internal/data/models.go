@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// ErrRecordNotFound is an error returned when a requested record cannot be found.
 var (
 	ErrRecordNotFound = errors.New("record not found")
 )

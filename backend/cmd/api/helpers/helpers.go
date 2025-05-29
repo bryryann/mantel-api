@@ -37,6 +37,9 @@ func GetEnvInt(key string, defaultValue int) (int, error) {
 	return i, nil
 }
 
+// ReadJSON reads and decodes JSON from the request body into the provided destination.
+// It limits the size of the request body to prevent overly large payloads and disallows unknown fields.
+// Returns an error if the JSON is malformed, contains incorrect types, is empty, or has other issues.
 func ReadJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
@@ -82,6 +85,9 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	return nil
 }
 
+// WriteJSON writes the provided data as a JSON response to the client.
+// It sets the appropriate headers, including Content-Type, and allows additional headers to be specified.
+// Returns an error if the data cannot be marshaled into JSON.
 func WriteJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
