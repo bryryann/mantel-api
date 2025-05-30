@@ -4,7 +4,7 @@ import NotFound from "@/pages/NotFound/NotFound";
 
 const AppRoutes = () => {
   return (
-    <Router>
+    <Router >
       <Routes>
         <Route path='/' element={<SplashScreen />} />
 

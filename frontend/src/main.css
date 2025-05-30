@@ -1,5 +1,23 @@
+:root {
+    --primary-lightest: #9c3b6c;
+    --primary-lighter: #852a52;
+    --primary-light: #6c1c3a;
+    --primary-default: #501124;
+    --primary-dark: #3c0c1a;
+
+    --background-light: #f9f9f9;
+    --background-default: #f1f2f2;
+    --background-dark: #c9cdcd;
+    --background-darker: #b2b8b8;
+    --background-darkest: #9aa3a3;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+body {
+    background-color: var(--background-default);
 }

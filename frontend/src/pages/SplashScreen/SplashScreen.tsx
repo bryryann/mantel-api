@@ -1,7 +1,11 @@
-import './SplashScreen.module.css';
+import './SplashScreen.css';
 
 const SplashScreen = () => {
-    return (<p>Welcome to Mantel!</p>);
+    return (
+        <main>
+            <h1>Welcome to Mantel</h1>
+        </main>
+    );
 };
 
 export default SplashScreen;
