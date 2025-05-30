@@ -10,11 +10,6 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bryryann/mantel.git",
-  },
-  "author": "Bryan R.",
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
