@@ -31,3 +31,7 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# SSL Certificates (local development only)
+certs/
+*.pem
