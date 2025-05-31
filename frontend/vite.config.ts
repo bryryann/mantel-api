@@ -12,5 +12,10 @@ export default defineConfig({
       cert: fs.readFileSync('./certs/localhost.pem'),
     },
     host: 'localhost',
-  }
+  },
+  css: {
+    modules: {
+      scopeBehaviour: 'local',
+    },
+  },
 });

@@ -20,4 +20,5 @@
 
 body {
     background-color: var(--background-default);
+    font-family: 'Inter', sans-serif;
 }
