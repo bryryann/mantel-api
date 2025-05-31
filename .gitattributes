@@ -1,0 +1,3 @@
+# Treat HTML and CSS files as Go language (apply to GitHub stats only.).
+*.html linguist-language=Go
+*.css linguist-language=Go
