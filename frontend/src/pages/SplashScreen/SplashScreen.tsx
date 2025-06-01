@@ -28,7 +28,7 @@ const SplashScreen = () => {
                     className='logo'
                 />
 
-                <div className={styles.container.headerBtns}>
+                <div className={styles.headerBtns}>
                     <Button variant='outline'>Sign Up</Button>
                     <Button variant='primary'>Log In</Button>
                 </div>
