@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import Button from '@/components/Button';
-import styles from './SplashScreen.module.css';
+import LoginForm from '@/components/auth/LoginForm';
 import logoColor from '@/assets/images/logo-color.png';
 import monogramColor from '@/assets/images/monogram-color.png';
+import styles from './AuthorizationScreen.module.css';
 
-const SplashScreen = () => {
+const AuthorizationScreen = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
@@ -28,15 +28,21 @@ const SplashScreen = () => {
                     className='logo'
                 />
 
-                <div className={styles.headerBtns}>
-                    <Button variant='outline'>Sign Up</Button>
-                    <Button variant='primary'>Log In</Button>
-                </div>
+                <h3>Sign in or register a new account</h3>
             </header>
             <div>
+                <LoginForm />
+                <div className={styles.toggle}>
+                    Don't have an account yet?
+                    <button
+                        type='button'
+                    >
+                        Sign up.
+                    </button>
+                </div>
             </div>
         </div>
     );
 };
 
-export default SplashScreen;
+export default AuthorizationScreen;
