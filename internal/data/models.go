@@ -13,7 +13,8 @@ var (
 // Models is a container struct that holds all the individual
 // database models used throughout the application.
 type Models struct {
-	Users UserModel
+	Users   UserModel
+	Follows FollowsModel
 }
 
 // NewModels initializes and returns a new Models struct,
