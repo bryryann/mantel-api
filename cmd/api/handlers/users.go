@@ -11,8 +11,6 @@ import (
 	"github.com/bryryann/mantel/backend/internal/validator"
 )
 
-type envelope map[string]any
-
 // registerUser handles the HTTP request for registering a new user.
 // It reads the JSON payload from the request, validates the input, and inserts the user into the database.
 func registerUser(w http.ResponseWriter, r *http.Request) {

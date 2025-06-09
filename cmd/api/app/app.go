@@ -20,9 +20,9 @@ import (
 
 // Route represents a registered HTTP route, containing it's handler and method.
 type Route struct {
-	Path    string           // URL Path pattern
-	Method  string           // HTTP Method(GET, POST, etc)
-	Handler http.HandlerFunc // Handler function for this route.
+	Path    string            // URL Path pattern
+	Method  string            // HTTP Method(GET, POST, etc)
+	Handler httprouter.Handle // Handler function for this route.
 }
 
 // App is the application container that holds:
@@ -117,7 +117,7 @@ func (a *App) SetupRouter() http.Handler {
 	// TODO: Add NotFound and MethodNotAllowed handlers.
 
 	for _, route := range a.routes {
-		router.HandlerFunc(route.Method, route.Path, route.Handler)
+		router.Handle(route.Method, route.Path, route.Handler)
 	}
 	return middleware.Apply(a.Context, a.Models, router)
 }
