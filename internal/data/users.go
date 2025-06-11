@@ -132,8 +132,9 @@ func (m UserModel) Get(userId int64) (*User, error) {
 	)
 
 	if err != nil {
-		// TODO: Add ErrRecordNotFound custom error
 		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
 		default:
 			return nil, err
 		}

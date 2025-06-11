@@ -21,6 +21,7 @@ type Models struct {
 // wiring up the database connection to each model.
 func NewModels(db *sql.DB) *Models {
 	return &Models{
-		Users: UserModel{DB: db},
+		Users:   UserModel{DB: db},
+		Follows: FollowsModel{DB: db},
 	}
 }

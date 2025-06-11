@@ -14,5 +14,8 @@ func init() {
 	app.Get("/v1/healthcheck", helpers.AdaptHttpRouterHandle(healthCheck))
 
 	app.Post("/v1/users", helpers.AdaptHttpRouterHandle(registerUser))
+	app.Post("/v1/users/:follower_id/follow", followUser)
+	app.Delete("/v1/users/:follower_id/unfollow/:followee_id", unfollowUser)
+
 	app.Post("/v1/tokens/authentication", helpers.AdaptHttpRouterHandle(authenticateToken))
 }
