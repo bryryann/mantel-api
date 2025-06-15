@@ -1,5 +1,5 @@
 // Package handlers groups every API handler and initializes them.
-package handlers
+package router
 
 import (
 	"github.com/bryryann/mantel/backend/cmd/api/app"

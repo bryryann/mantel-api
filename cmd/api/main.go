@@ -9,8 +9,8 @@ import (
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
-	_ "github.com/bryryann/mantel/backend/cmd/api/handlers"
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	_ "github.com/bryryann/mantel/backend/cmd/api/router"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
