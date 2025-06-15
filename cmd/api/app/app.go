@@ -5,25 +5,15 @@ package app
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"sync"
 
 	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/bryryann/mantel/backend/cmd/api/database"
-	"github.com/bryryann/mantel/backend/cmd/api/middleware"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
-	"github.com/julienschmidt/httprouter"
 )
-
-// Route represents a registered HTTP route, containing it's handler and method.
-type Route struct {
-	Path    string            // URL Path pattern
-	Method  string            // HTTP Method(GET, POST, etc)
-	Handler httprouter.Handle // Handler function for this route.
-}
 
 // App is the application container that holds:
 // - Shared dependencies (Configuration, Logger)
@@ -36,7 +26,6 @@ type App struct {
 	Models    *data.Models
 	Context   *appcontext.Context
 	Responses *responses.Responses
-	routes    []Route
 	mu        sync.RWMutex
 }
 
@@ -50,7 +39,6 @@ var (
 func Get() *App {
 	once.Do(func() {
 		instance = &App{
-			routes:    make([]Route, 0),
 			Context:   &appcontext.Context{},
 			Responses: responses.Get(),
 		}
@@ -106,18 +94,4 @@ func (a *App) ConfigureLogger(logLevel string) {
 	handler := slog.NewTextHandler(os.Stdout, opts)
 
 	a.Logger = slog.New(handler)
-}
-
-// SetupRouter initializes an http.Handler with all registered routes.
-func (a *App) SetupRouter() http.Handler {
-	router := httprouter.New()
-	a.mu.RLock()
-	defer a.mu.RUnlock()
-
-	// TODO: Add NotFound and MethodNotAllowed handlers.
-
-	for _, route := range a.routes {
-		router.Handle(route.Method, route.Path, route.Handler)
-	}
-	return middleware.Apply(a.Context, a.Models, router)
 }

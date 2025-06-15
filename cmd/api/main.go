@@ -10,6 +10,7 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/router"
 	_ "github.com/bryryann/mantel/backend/cmd/api/router"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -52,20 +53,20 @@ func main() {
 
 // startServer contains all code related to api initialization.
 func startServer() {
-	application := app.Get()
-	router := application.SetupRouter()
+	app := app.Get()
+	router := router.SetupRouter(app.Context, app.Models)
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", application.Config.Port),
+		Addr:         fmt.Sprintf(":%d", app.Config.Port),
 		Handler:      router,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		ErrorLog:     slog.NewLogLogger(application.Logger.Handler(), slog.LevelError),
+		ErrorLog:     slog.NewLogLogger(app.Logger.Handler(), slog.LevelError),
 	}
 
 	err := srv.ListenAndServe()
 	if err != nil {
-		application.Logger.Error(err.Error())
+		app.Logger.Error(err.Error())
 	}
 }
