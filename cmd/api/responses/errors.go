@@ -8,7 +8,7 @@ import (
 )
 
 // logError logs the provided error using the logger associated with the Responses struct.
-func (res *Responses) logError(r *http.Request, err error) {
+func (res *Responses) logError(_ *http.Request, err error) {
 	res.logger.Info(err.Error())
 }
 
