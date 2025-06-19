@@ -25,3 +25,14 @@ func NewModels(db *sql.DB) *Models {
 		Follows: FollowsModel{DB: db},
 	}
 }
+
+func MockModels() *Models {
+	return &Models{
+		Users: UserModel{
+			DB: nil,
+		},
+		Follows: FollowsModel{
+			DB: nil,
+		},
+	}
+}
