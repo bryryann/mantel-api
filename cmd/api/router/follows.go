@@ -7,6 +7,7 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
+	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -99,6 +100,9 @@ func userFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		return
 	}
 
+	if followers == nil {
+		followers = []data.User{}
+	}
 	env := envelope{"user": user, "followers": followers}
 
 	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
