@@ -56,3 +56,68 @@ func (m FollowsModel) Delete(followerID, followeeID int64) error {
 
 	return nil
 }
+
+func (m FollowsModel) GetFollowers(id int64) ([]User, error) {
+	query := `
+		SELECT u.id, u.username, u.email, f.created_at
+		FROM follows f
+		JOIN users u ON f.follower_id = u.id
+		WHERE f.followee_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var followers []User
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.CreatedAt); err != nil {
+			return nil, err
+		}
+		followers = append(followers, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return followers, nil
+}
+
+func (m FollowsModel) GetFollowees(id int64) ([]User, error) {
+	query := `
+		SELECT u.id, u.username, u.email, f.created_at
+		FROM follows f
+		JOIN users u ON f.followee_id = u.id
+		WHERE f.follower_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var followees []User
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.CreatedAt); err != nil {
+			return nil, err
+		}
+		followees = append(followees, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return followees, nil
+
+}
