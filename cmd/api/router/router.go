@@ -48,5 +48,7 @@ func init() {
 	Post("/v1/users/:follower_id/follow", followUser)
 	Delete("/v1/users/:follower_id/unfollow/:followee_id", unfollowUser)
 
+	Get("/v1/users/:user_id/followers", userFollowers)
+
 	Post("/v1/tokens/authentication", helpers.AdaptHttpRouterHandle(authenticateToken))
 }

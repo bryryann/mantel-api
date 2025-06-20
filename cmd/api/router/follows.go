@@ -76,3 +76,30 @@ func unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 	w.WriteHeader(http.StatusAccepted)
 }
+
+func userFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	id, err := strconv.Atoi(ps.ByName("user_id"))
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	user, err := app.Models.Users.Get(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	followers, err := app.Models.Follows.GetFollowers(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	env := envelope{"user": user, "followers": followers}
+
+	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
+}
