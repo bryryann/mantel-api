@@ -11,6 +11,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// followUser handles the request for following a user.
+// It receives a follower_id in the url, and the person to be followed
+// as followee_id as the JSON body.
 func followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
@@ -55,6 +58,8 @@ func followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
+// unfollowUser deletes a follow instance from the database.
+// It receives both the follower_id and followee_id, validates whether it exists or not, and perform the appropriate db query.
 func unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
@@ -78,6 +83,8 @@ func unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// userFollowers return data about the user and it's followers.
+// This function might be changed in the future to return all user related data, so treat it as temporarily as follower related.
 func userFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
