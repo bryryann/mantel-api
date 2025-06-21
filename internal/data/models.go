@@ -26,6 +26,8 @@ func NewModels(db *sql.DB) *Models {
 	}
 }
 
+// MockModels initializes a new Models struct, wiring up to no database connection.
+// Made for unit testing purposes.
 func MockModels() *Models {
 	return &Models{
 		Users: UserModel{

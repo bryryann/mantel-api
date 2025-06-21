@@ -57,6 +57,7 @@ func (m FollowsModel) Delete(followerID, followeeID int64) error {
 	return nil
 }
 
+// GetFollowers returns a slice with every follower that user with related id has.
 func (m FollowsModel) GetFollowers(id int64) ([]User, error) {
 	query := `
 		SELECT u.id, u.username, u.email, f.created_at
@@ -89,6 +90,7 @@ func (m FollowsModel) GetFollowers(id int64) ([]User, error) {
 	return followers, nil
 }
 
+// GetFollowers returns a slice with every follow by the user with given id.
 func (m FollowsModel) GetFollowees(id int64) ([]User, error) {
 	query := `
 		SELECT u.id, u.username, u.email, f.created_at
