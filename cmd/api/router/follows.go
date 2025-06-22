@@ -114,3 +114,33 @@ func userFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 
 	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
 }
+
+func userFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	id, err := strconv.Atoi(ps.ByName("user_id"))
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	user, err := app.Models.Users.Get(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	followees, err := app.Models.Follows.GetFollowees(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if followees == nil {
+		followees = []data.User{}
+	}
+	env := envelope{"user": user, "followees": followees}
+
+	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
+}
