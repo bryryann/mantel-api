@@ -30,6 +30,12 @@ type User struct {
 	Version   int       `json:"-"`
 }
 
+// UserPublic contains no sensitive information about user. Safe for public exposure.
+type UserPublic struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+}
+
 // IsAnonymous returns true if the user is the predefined AnonymousUser.
 // This is used to check if the current user is unauthenticated.
 func (u *User) IsAnonymous() bool {

@@ -58,9 +58,9 @@ func (m FollowsModel) Delete(followerID, followeeID int64) error {
 }
 
 // GetFollowers returns a slice with every follower that user with related id has.
-func (m FollowsModel) GetFollowers(id int64) ([]User, error) {
+func (m FollowsModel) GetFollowers(id int64) ([]UserPublic, error) {
 	query := `
-		SELECT u.id, u.username, u.email, f.created_at
+		SELECT u.id, u.username
 		FROM follows f
 		JOIN users u ON f.follower_id = u.id
 		WHERE f.followee_id = $1`
@@ -74,10 +74,10 @@ func (m FollowsModel) GetFollowers(id int64) ([]User, error) {
 	}
 	defer rows.Close()
 
-	var followers []User
+	var followers []UserPublic
 	for rows.Next() {
-		var u User
-		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.CreatedAt); err != nil {
+		var u UserPublic
+		if err := rows.Scan(&u.ID, &u.Username); err != nil {
 			return nil, err
 		}
 		followers = append(followers, u)
@@ -91,9 +91,9 @@ func (m FollowsModel) GetFollowers(id int64) ([]User, error) {
 }
 
 // GetFollowers returns a slice with every follow by the user with given id.
-func (m FollowsModel) GetFollowees(id int64) ([]User, error) {
+func (m FollowsModel) GetFollowees(id int64) ([]UserPublic, error) {
 	query := `
-		SELECT u.id, u.username, u.email, f.created_at
+		SELECT u.id, u.username
 		FROM follows f
 		JOIN users u ON f.followee_id = u.id
 		WHERE f.follower_id = $1`
@@ -107,10 +107,10 @@ func (m FollowsModel) GetFollowees(id int64) ([]User, error) {
 	}
 	defer rows.Close()
 
-	var followees []User
+	var followees []UserPublic
 	for rows.Next() {
-		var u User
-		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.CreatedAt); err != nil {
+		var u UserPublic
+		if err := rows.Scan(&u.ID, &u.Username); err != nil {
 			return nil, err
 		}
 		followees = append(followees, u)

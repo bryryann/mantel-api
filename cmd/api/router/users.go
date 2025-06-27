@@ -42,10 +42,10 @@ func userData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	if followers == nil {
-		followers = []data.User{}
+		followers = []data.UserPublic{}
 	}
 	if followees == nil {
-		followees = []data.User{}
+		followees = []data.UserPublic{}
 	}
 
 	env := envelope{"user": user, "followers": followers, "followees": followees}
