@@ -7,7 +7,6 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
-	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -81,66 +80,4 @@ func unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 
 	w.WriteHeader(http.StatusAccepted)
-}
-
-// userFollowers return data about the user and it's followers.
-// This function might be changed in the future to return all user related data, so treat it as temporarily as follower related.
-func userFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	app := app.Get()
-	res := responses.Get()
-
-	id, err := strconv.Atoi(ps.ByName("user_id"))
-	if err != nil {
-		res.BadRequestResponse(w, r, err)
-		return
-	}
-
-	user, err := app.Models.Users.Get(int64(id))
-	if err != nil {
-		res.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	followers, err := app.Models.Follows.GetFollowers(int64(id))
-	if err != nil {
-		res.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	if followers == nil {
-		followers = []data.User{}
-	}
-	env := envelope{"user": user, "followers": followers}
-
-	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
-}
-
-func userFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	app := app.Get()
-	res := responses.Get()
-
-	id, err := strconv.Atoi(ps.ByName("user_id"))
-	if err != nil {
-		res.BadRequestResponse(w, r, err)
-		return
-	}
-
-	user, err := app.Models.Users.Get(int64(id))
-	if err != nil {
-		res.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	followees, err := app.Models.Follows.GetFollowees(int64(id))
-	if err != nil {
-		res.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	if followees == nil {
-		followees = []data.User{}
-	}
-	env := envelope{"user": user, "followees": followees}
-
-	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
 }

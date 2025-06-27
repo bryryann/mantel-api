@@ -44,12 +44,10 @@ func SetupRouter(ctx *appcontext.Context, models *data.Models) http.Handler {
 func init() {
 	Get("/v1/healthcheck", helpers.AdaptHttpRouterHandle(healthCheck))
 
+	Get("/v1/users/:user_id", userData)
 	Post("/v1/users", helpers.AdaptHttpRouterHandle(registerUser))
 	Post("/v1/users/:follower_id/follow", followUser)
 	Delete("/v1/users/:follower_id/unfollow/:followee_id", unfollowUser)
-
-	Get("/v1/users/:user_id/followers", userFollowers)
-	Get("/v1/users/:user_id/followees", userFollowees)
 
 	Post("/v1/tokens/authentication", helpers.AdaptHttpRouterHandle(authenticateToken))
 }
