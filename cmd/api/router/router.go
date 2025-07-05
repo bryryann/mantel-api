@@ -46,8 +46,12 @@ func init() {
 
 	Get("/v1/users/:user_id", userData)
 	Post("/v1/users", helpers.AdaptHttpRouterHandle(registerUser))
+	Post("/v1/tokens/authentication", helpers.AdaptHttpRouterHandle(authenticateToken))
+
 	Post("/v1/users/:follower_id/follow", followUser)
 	Delete("/v1/users/:follower_id/unfollow/:followee_id", unfollowUser)
 
-	Post("/v1/tokens/authentication", helpers.AdaptHttpRouterHandle(authenticateToken))
+	Post("/v1/friends/send", helpers.AdaptHttpRouterHandle(sendFriendRequest))
+	Post("/v1/friends/accept", helpers.AdaptHttpRouterHandle(acceptFriendRequest))
+
 }
