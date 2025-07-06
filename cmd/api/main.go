@@ -11,7 +11,6 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/config"
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/router"
-	_ "github.com/bryryann/mantel/backend/cmd/api/router"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -45,6 +44,8 @@ func main() {
 	application.SetConfig(cfg)
 	application.SetDB(cfg.DSN)
 	application.SetModels()
+
+	router.InitializeRouter(application.Context)
 
 	application.Logger.Info("all set up!")
 

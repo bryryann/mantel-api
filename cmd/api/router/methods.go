@@ -3,6 +3,9 @@ package router
 import (
 	"net/http"
 
+	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/middleware"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -28,10 +31,22 @@ func Get(path string, handler httprouter.Handle) {
 	RegisterHandler(http.MethodGet, path, handler)
 }
 
+// ProtectedGet register a handler for HTTP GET requests that require an authenticated user.
+func ProtectedGet(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
+	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	Get(path, protectedHandler)
+}
+
 // Post register a handler for HTTP POST requests.
 // This is a convenience wrapper aruond RegisterHandler.
 func Post(path string, handler httprouter.Handle) {
 	RegisterHandler(http.MethodPost, path, handler)
+}
+
+// ProtectedPost register a handler for HTTP POST requests that require an authenticated user.
+func ProtectedPost(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
+	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	Post(path, protectedHandler)
 }
 
 // Put register a handler for HTTP PUT requests.
@@ -40,8 +55,20 @@ func Put(path string, handler httprouter.Handle) {
 	RegisterHandler(http.MethodPut, path, handler)
 }
 
+// ProtectedPut register a handler for HTTP PUT requests that require an authenticated user.
+func ProtectedPut(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
+	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	Put(path, protectedHandler)
+}
+
 // Delete register a handler for HTTP DELETE requests.
 // This is a convenience wrapper aruond RegisterHandler.
 func Delete(path string, handler httprouter.Handle) {
 	RegisterHandler(http.MethodDelete, path, handler)
+}
+
+// ProtectedDelete register a handler for HTTP DELETE requests that require an authenticated user.
+func ProtectedDelete(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
+	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	Delete(path, protectedHandler)
 }

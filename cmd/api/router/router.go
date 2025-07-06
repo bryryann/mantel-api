@@ -41,7 +41,7 @@ func SetupRouter(ctx *appcontext.Context, models *data.Models) http.Handler {
 	return middleware.Apply(ctx, models, router)
 }
 
-func init() {
+func InitializeRouter(context *appcontext.Context) {
 	Get("/v1/healthcheck", helpers.AdaptHttpRouterHandle(healthCheck))
 
 	Get("/v1/users/:user_id", userData)
