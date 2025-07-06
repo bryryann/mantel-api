@@ -41,17 +41,23 @@ func SetupRouter(ctx *appcontext.Context, models *data.Models) http.Handler {
 	return middleware.Apply(ctx, models, router)
 }
 
-func InitializeRouter(context *appcontext.Context) {
-	Get("/v1/healthcheck", helpers.AdaptHttpRouterHandle(healthCheck))
+func InitializeRouter(ctx *appcontext.Context) {
+	httprouterCompatible := helpers.AdaptHttpRouterHandle
+	httpCompatible := helpers.AdaptHttpHandlerFunc
 
+	// healthcheck
+	Get("/v1/healthcheck", httprouterCompatible(ctx, healthCheck))
+
+	// user and authentication
 	Get("/v1/users/:user_id", userData)
-	Post("/v1/users", helpers.AdaptHttpRouterHandle(registerUser))
-	Post("/v1/tokens/authentication", helpers.AdaptHttpRouterHandle(authenticateToken))
+	Post("/v1/users", httprouterCompatible(ctx, registerUser))
+	Post("/v1/tokens/authentication", httprouterCompatible(ctx, authenticateToken))
 
-	Post("/v1/users/:follower_id/follow", followUser)
-	Delete("/v1/users/:follower_id/unfollow/:followee_id", unfollowUser)
+	// follows
+	ProtectedPost("/v1/users/:follower_id/follow", httpCompatible(ctx, followUser), ctx)
+	ProtectedPost("/v1/users/:follower_id/unfollow/:followee_id", httpCompatible(ctx, unfollowUser), ctx)
 
-	Post("/v1/friends/send", helpers.AdaptHttpRouterHandle(sendFriendRequest))
-	Post("/v1/friends/accept", helpers.AdaptHttpRouterHandle(acceptFriendRequest))
-
+	// friendships
+	ProtectedPost("/v1/friends/send", sendFriendRequest, ctx)
+	ProtectedPost("/v1/friends/accept", acceptFriendRequest, ctx)
 }

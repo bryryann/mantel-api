@@ -33,7 +33,7 @@ func Get(path string, handler httprouter.Handle) {
 
 // ProtectedGet register a handler for HTTP GET requests that require an authenticated user.
 func ProtectedGet(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
-	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	protectedHandler := helpers.AdaptHttpRouterHandle(ctx, middleware.RequireAuthenticatedUser(ctx, handler))
 	Get(path, protectedHandler)
 }
 
@@ -45,7 +45,7 @@ func Post(path string, handler httprouter.Handle) {
 
 // ProtectedPost register a handler for HTTP POST requests that require an authenticated user.
 func ProtectedPost(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
-	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	protectedHandler := helpers.AdaptHttpRouterHandle(ctx, middleware.RequireAuthenticatedUser(ctx, handler))
 	Post(path, protectedHandler)
 }
 
@@ -57,7 +57,7 @@ func Put(path string, handler httprouter.Handle) {
 
 // ProtectedPut register a handler for HTTP PUT requests that require an authenticated user.
 func ProtectedPut(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
-	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	protectedHandler := helpers.AdaptHttpRouterHandle(ctx, middleware.RequireAuthenticatedUser(ctx, handler))
 	Put(path, protectedHandler)
 }
 
@@ -69,6 +69,6 @@ func Delete(path string, handler httprouter.Handle) {
 
 // ProtectedDelete register a handler for HTTP DELETE requests that require an authenticated user.
 func ProtectedDelete(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
-	protectedHandler := helpers.AdaptHttpRouterHandle(middleware.RequireAuthenticatedUser(ctx, handler))
+	protectedHandler := helpers.AdaptHttpRouterHandle(ctx, middleware.RequireAuthenticatedUser(ctx, handler))
 	Delete(path, protectedHandler)
 }
