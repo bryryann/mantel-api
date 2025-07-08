@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrFriendshipRequestToSelf = errors.New("cannot send friend request to yourself")
+	ErrNoSuchRequest           = errors.New("the friend request does not exist")
 )
 
 type FriendshipStatus string
@@ -67,20 +68,37 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 }
 
 func (m FriendshipModel) AcceptRequest(fs *Friendship) error {
+	checkQuery := `
+		SELECT COUNT(*) FROM friendships
+		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	err := m.DB.QueryRowContext(ctx, checkQuery, fs.UserID, fs.FriendID).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return ErrNoSuchRequest
+	}
+
 	query := `
 		UPDATE friendships
 		SET status = 'accepted', updated_at = $3
 		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
 	`
+	args := []any{fs.UserID, fs.FriendID, time.Now()}
 
-	args := []any{fs.UserID, fs.FriendID}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := m.DB.QueryRowContext(ctx, query, args...)
+	_, err = m.DB.ExecContext(ctx, query, args...)
 	if err != nil {
-		return err.Err()
+		return err
 	}
 
 	return nil

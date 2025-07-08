@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
@@ -73,7 +74,12 @@ func acceptFriendRequest(w http.ResponseWriter, r *http.Request) {
 
 	err = app.Models.Friendships.AcceptRequest(fs)
 	if err != nil {
-		res.ServerErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrNoSuchRequest):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
 		return
 	}
 
