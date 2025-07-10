@@ -13,7 +13,15 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func userData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func getAuthUser(w http.ResponseWriter, r *http.Request) {
+	app := app.Get()
+
+	user := app.Context.GetUser(r)
+
+	helpers.WriteJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
+}
+
+func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
 
