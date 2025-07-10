@@ -9,18 +9,18 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 )
 
+type JWT struct {
+	Secret   string
+	Issuer   string
+	Audience string
+}
+
 // Configuration holds the values used to setup the application
 type Configuration struct {
 	Port int    // Port in which the API will be hosted.
 	Env  string // Current application environment (DEVELOPMENT, PRODUCTION, etc).
 	DSN  string
 	JWT  JWT
-}
-
-type JWT struct {
-	Secret   string
-	Issuer   string
-	Audience string
 }
 
 var (
