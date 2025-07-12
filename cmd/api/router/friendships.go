@@ -14,8 +14,9 @@ func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()
 
+	user := app.Context.GetUser(r)
+
 	var input struct {
-		UserID   int `json:"user_id"`
 		FriendID int `json:"friend_id"`
 	}
 
@@ -26,7 +27,7 @@ func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fs := &data.Friendship{
-		UserID:   int64(input.UserID),
+		UserID:   user.ID,
 		FriendID: int64(input.FriendID),
 	}
 
@@ -56,9 +57,10 @@ func acceptFriendRequest(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()
 
+	user := app.Context.GetUser(r)
+
 	var input struct {
-		UserID   int `json:"user_id"`
-		FriendID int `json:"friend_id"`
+		SenderID int `json:"sender_id"`
 	}
 
 	err := helpers.ReadJSON(w, r, &input)
@@ -68,8 +70,8 @@ func acceptFriendRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fs := &data.Friendship{
-		UserID:   int64(input.UserID),
-		FriendID: int64(input.FriendID),
+		UserID:   int64(input.SenderID),
+		FriendID: user.ID,
 	}
 
 	err = app.Models.Friendships.AcceptRequest(fs)

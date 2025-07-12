@@ -37,26 +37,10 @@ func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	followers, err := app.Models.Follows.GetFollowers(int64(id))
-	if err != nil {
-		res.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	followees, err := app.Models.Follows.GetFollowees(int64(id))
-	if err != nil {
-		res.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	if followers == nil {
-		followers = []data.UserPublic{}
-	}
-	if followees == nil {
-		followees = []data.UserPublic{}
-	}
-
-	env := envelope{"user": user, "followers": followers, "followees": followees}
+	env := envelope{"user": &data.UserPublic{
+		ID:       user.ID,
+		Username: user.Username,
+	}}
 
 	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
 }
