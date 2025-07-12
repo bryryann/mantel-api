@@ -7,6 +7,7 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
+	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -80,4 +81,50 @@ func unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	id, err := strconv.Atoi(ps.ByName("user_id"))
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	followers, err := app.Models.Follows.GetFollowers(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if followers == nil {
+		followers = []data.UserPublic{}
+	}
+
+	helpers.WriteJSON(w, http.StatusAccepted, envelope{"followers": followers}, nil)
+}
+
+func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	id, err := strconv.Atoi(ps.ByName("user_id"))
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	followees, err := app.Models.Follows.GetFollowees(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if followees == nil {
+		followees = []data.UserPublic{}
+	}
+
+	helpers.WriteJSON(w, http.StatusAccepted, envelope{"followees": followees}, nil)
 }
