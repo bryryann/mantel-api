@@ -15,9 +15,11 @@ import (
 //
 // AnonymousUser is a sentinel value used to represent an unauthenticated or guest user.
 var (
+	ErrUserNotFound      = errors.New("user not found")
 	ErrDuplicateEmail    = errors.New("duplicate email")
 	ErrDuplicateUsername = errors.New("duplicate username")
-	AnonymousUser        = &User{}
+
+	AnonymousUser = &User{}
 )
 
 // User represents a user in the system.
@@ -215,6 +217,28 @@ func (m UserModel) Update(user *User) error {
 	}
 
 	return nil
+}
+
+func (m UserModel) Exists(id int64) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1 FROM users WHERE id = $1
+		)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var exists bool
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
+		return false, ErrUserNotFound
+	}
+
+	return true, nil
 }
 
 // ValidateEmail checks whether the provided email string is valid,

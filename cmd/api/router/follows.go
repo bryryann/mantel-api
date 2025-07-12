@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -93,6 +94,17 @@ func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
+	_, err = app.Models.Users.Exists(int64(id))
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrUserNotFound):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
 	followers, err := app.Models.Follows.GetFollowers(int64(id))
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
@@ -113,6 +125,17 @@ func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	id, err := strconv.Atoi(ps.ByName("user_id"))
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	_, err = app.Models.Users.Exists(int64(id))
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrUserNotFound):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
 		return
 	}
 
