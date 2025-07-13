@@ -103,3 +103,38 @@ func (m FriendshipModel) AcceptRequest(fs *Friendship) error {
 
 	return nil
 }
+
+func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
+	query := `
+		SELECT user_id, friend_id, created_at, status
+		FROM friendships
+		WHERE friend_id = $1 and status = 'pending'
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var requests []Friendship
+	for rows.Next() {
+		var f Friendship
+
+		err = rows.Scan(&f.UserID, &f.FriendID, &f.CreatedAt, &f.Status)
+		if err != nil {
+			return nil, err
+		}
+
+		requests = append(requests, f)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return requests, nil
+}

@@ -90,3 +90,21 @@ func acceptFriendRequest(w http.ResponseWriter, r *http.Request) {
 		res.ServerErrorResponse(w, r, err)
 	}
 }
+
+func listPendingRequests(w http.ResponseWriter, r *http.Request) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	reqs, err := app.Models.Friendships.GetPendingRequests(int64(user.ID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"requests": reqs}, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
