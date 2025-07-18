@@ -68,21 +68,12 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 }
 
 func (m FriendshipModel) AcceptRequest(fs *Friendship) error {
-	checkQuery := `
-		SELECT COUNT(*) FROM friendships
-		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var count int
-	err := m.DB.QueryRowContext(ctx, checkQuery, fs.UserID, fs.FriendID).Scan(&count)
+	exists, err := requestExists(m.DB, fs)
 	if err != nil {
 		return err
 	}
 
-	if count == 0 {
+	if !exists {
 		return ErrNoSuchRequest
 	}
 
@@ -93,10 +84,41 @@ func (m FriendshipModel) AcceptRequest(fs *Friendship) error {
 	`
 	args := []any{fs.UserID, fs.FriendID, time.Now()}
 
-	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	_, err = m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m FriendshipModel) RejectRequest(fs *Friendship) error {
+	exists, err := requestExists(m.DB, fs)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return ErrNoSuchRequest
+	}
+
+	query := `
+		DELETE FROM friendships
+		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	res, err := m.DB.ExecContext(ctx, query, fs.UserID, fs.FriendID)
+	if err != nil {
+		return err
+	}
+
+	_, err = res.RowsAffected()
 	if err != nil {
 		return err
 	}
@@ -137,4 +159,25 @@ func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
 	}
 
 	return requests, nil
+}
+
+func requestExists(db *sql.DB, fs *Friendship) (bool, error) {
+	checkQuery := `
+		SELECT COUNT(*) FROM friendships
+		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	err := db.QueryRowContext(ctx, checkQuery, fs.UserID, fs.FriendID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	if count == 0 {
+		return false, nil
+	}
+	return true, nil
 }
