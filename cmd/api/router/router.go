@@ -62,6 +62,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 
 	// friendships
 	ProtectedPost("/v1/friends/send", sendFriendRequest, ctx)
-	ProtectedPost("/v1/friends/accept", acceptFriendRequest, ctx)
+	ProtectedPost("/v1/friends/accept", acceptPendingFriendRequest, ctx)
+	ProtectedDelete("/v1/friends/reject", rejectPendingFriendRequest, ctx)
 	ProtectedGet("/v1/friends/pending", listPendingRequests, ctx)
 }

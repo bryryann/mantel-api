@@ -53,7 +53,7 @@ func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func acceptFriendRequest(w http.ResponseWriter, r *http.Request) {
+func acceptPendingFriendRequest(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()
 
@@ -86,6 +86,44 @@ func acceptFriendRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"message": "friend request accepted"}, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
+func rejectPendingFriendRequest(w http.ResponseWriter, r *http.Request) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	var input struct {
+		SenderID int `json:"sender_id"`
+	}
+
+	err := helpers.ReadJSON(w, r, &input)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	fs := &data.Friendship{
+		UserID:   int64(input.SenderID),
+		FriendID: user.ID,
+	}
+
+	err = app.Models.Friendships.RejectRequest(fs)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrNoSuchRequest):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"message": "friend request rejected"}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
