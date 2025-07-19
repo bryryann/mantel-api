@@ -30,12 +30,13 @@ func (s FriendshipStatus) IsValidFriendshipStatus() bool {
 }
 
 type Friendship struct {
-	UserID    int64            `json:"user_id"`
-	FriendID  int64            `json:"friend_id"`
-	CreatedAt time.Time        `json:"created_at"`
-	UpdatedAt time.Time        `json:"-"`
-	Status    FriendshipStatus `json:"status"`
-	Version   int              `json:"-"`
+	ID         int64            `json:"id"`
+	SenderID   int64            `json:"sender_id"`
+	ReceiverID int64            `json:"receiver_id"`
+	CreatedAt  time.Time        `json:"created_at"`
+	UpdatedAt  time.Time        `json:"-"`
+	Status     FriendshipStatus `json:"status"`
+	Version    int              `json:"-"`
 }
 
 type FriendshipModel struct {
@@ -43,18 +44,18 @@ type FriendshipModel struct {
 }
 
 func (m FriendshipModel) SendRequest(fs *Friendship) error {
-	if fs.UserID == fs.FriendID {
+	if fs.SenderID == fs.ReceiverID {
 		return ErrFriendshipRequestToSelf
 	}
 
 	query := `
-		INSERT INTO friendships (user_id, friend_id)
+		INSERT INTO friendships (sender_id, receiver_id)
 		VALUES ($1, $2)
 		RETURNING created_at, status
-		ON CONFLICT (user_id, friend_id) DO NOTHING
+		ON CONFLICT (sender_id, receiver_id) DO NOTHING
 	`
 
-	args := []any{fs.UserID, fs.FriendID}
+	args := []any{fs.SenderID, fs.ReceiverID}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -80,9 +81,9 @@ func (m FriendshipModel) AcceptRequest(fs *Friendship) error {
 	query := `
 		UPDATE friendships
 		SET status = 'accepted', updated_at = $3
-		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
+		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'
 	`
-	args := []any{fs.UserID, fs.FriendID, time.Now()}
+	args := []any{fs.SenderID, fs.ReceiverID, time.Now()}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -107,13 +108,13 @@ func (m FriendshipModel) RejectRequest(fs *Friendship) error {
 
 	query := `
 		DELETE FROM friendships
-		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
+		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	res, err := m.DB.ExecContext(ctx, query, fs.UserID, fs.FriendID)
+	res, err := m.DB.ExecContext(ctx, query, fs.SenderID, fs.ReceiverID)
 	if err != nil {
 		return err
 	}
@@ -128,9 +129,9 @@ func (m FriendshipModel) RejectRequest(fs *Friendship) error {
 
 func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
 	query := `
-		SELECT user_id, friend_id, created_at, status
+		SELECT sender_id, receiver_id, created_at, status
 		FROM friendships
-		WHERE friend_id = $1 and status = 'pending'
+		WHERE receiver_id = $1 and status = 'pending'
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -146,7 +147,7 @@ func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
 	for rows.Next() {
 		var f Friendship
 
-		err = rows.Scan(&f.UserID, &f.FriendID, &f.CreatedAt, &f.Status)
+		err = rows.Scan(&f.SenderID, &f.ReceiverID, &f.CreatedAt, &f.Status)
 		if err != nil {
 			return nil, err
 		}
@@ -164,14 +165,14 @@ func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
 func requestExists(db *sql.DB, fs *Friendship) (bool, error) {
 	checkQuery := `
 		SELECT COUNT(*) FROM friendships
-		WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
+		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	var count int
-	err := db.QueryRowContext(ctx, checkQuery, fs.UserID, fs.FriendID).Scan(&count)
+	err := db.QueryRowContext(ctx, checkQuery, fs.SenderID, fs.ReceiverID).Scan(&count)
 	if err != nil {
 		return false, err
 	}
