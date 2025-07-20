@@ -61,8 +61,8 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedPost("/v1/users/:follower_id/unfollow/:followee_id", httpCompatible(ctx, unfollowUser), ctx)
 
 	// friendships
-	ProtectedPost("/v1/friends/send", sendFriendRequest, ctx)
-	ProtectedPost("/v1/friends/accept", acceptPendingFriendRequest, ctx)
-	ProtectedDelete("/v1/friends/reject", rejectPendingFriendRequest, ctx)
-	ProtectedGet("/v1/friends/pending", listPendingRequests, ctx)
+	ProtectedGet("/v1/friend-requests", listPendingRequests, ctx)
+	ProtectedPost("/v1/friend-requests", sendFriendRequest, ctx)
+	ProtectedPatch("/v1/friend-requests/:id", httpCompatible(ctx, patchPendingFriendRequest), ctx)
+
 }

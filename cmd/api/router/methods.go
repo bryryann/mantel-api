@@ -61,6 +61,15 @@ func ProtectedPut(path string, handler http.HandlerFunc, ctx *appcontext.Context
 	Put(path, protectedHandler)
 }
 
+func Patch(path string, handler httprouter.Handle) {
+	RegisterHandler(http.MethodPatch, path, handler)
+}
+
+func ProtectedPatch(path string, handler http.HandlerFunc, ctx *appcontext.Context) {
+	protectedHandler := helpers.AdaptHttpRouterHandle(ctx, middleware.RequireAuthenticatedUser(ctx, handler))
+	Patch(path, protectedHandler)
+}
+
 // Delete register a handler for HTTP DELETE requests.
 // This is a convenience wrapper aruond RegisterHandler.
 func Delete(path string, handler httprouter.Handle) {

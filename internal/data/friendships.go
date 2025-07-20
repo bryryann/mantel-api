@@ -10,6 +10,7 @@ import (
 var (
 	ErrFriendshipRequestToSelf = errors.New("cannot send friend request to yourself")
 	ErrNoSuchRequest           = errors.New("the friend request does not exist")
+	ErrInvalidFriendshipStatus = errors.New("given status is not valid for friendships")
 )
 
 type FriendshipStatus string
@@ -68,63 +69,40 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 	return nil
 }
 
-func (m FriendshipModel) AcceptRequest(fs *Friendship) error {
+func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
 	exists, err := requestExists(m.DB, fs)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !exists {
-		return ErrNoSuchRequest
+		return nil, ErrNoSuchRequest
 	}
 
 	query := `
 		UPDATE friendships
-		SET status = 'accepted', updated_at = $3
-		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'
+		SET status = $1, updated_at = $3
+		WHERE id = $2 AND receiver_id = $4
+		RETURNING sender_id, updated_at, created_at
 	`
-	args := []any{fs.SenderID, fs.ReceiverID, time.Now()}
+	args := []any{
+		fs.Status,
+		fs.ID,
+		time.Now(),
+		fs.ReceiverID,
+	}
 
+	patched := *fs
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err = m.DB.ExecContext(ctx, query, args...)
+	err = m.DB.QueryRowContext(ctx, query, args...).Scan(&patched.SenderID, &patched.UpdatedAt, &patched.CreatedAt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
-}
+	return &patched, nil
 
-func (m FriendshipModel) RejectRequest(fs *Friendship) error {
-	exists, err := requestExists(m.DB, fs)
-	if err != nil {
-		return err
-	}
-
-	if !exists {
-		return ErrNoSuchRequest
-	}
-
-	query := `
-		DELETE FROM friendships
-		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	res, err := m.DB.ExecContext(ctx, query, fs.SenderID, fs.ReceiverID)
-	if err != nil {
-		return err
-	}
-
-	_, err = res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
