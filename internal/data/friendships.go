@@ -105,11 +105,46 @@ func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
 
 }
 
-func (m FriendshipModel) GetPendingRequests(id int64) ([]Friendship, error) {
+func (m FriendshipModel) GetSentPendingRequests(id int64) ([]Friendship, error) {
 	query := `
 		SELECT sender_id, receiver_id, created_at, status
 		FROM friendships
-		WHERE receiver_id = $1 and status = 'pending'
+		WHERE sender_id = $1 AND status = 'pending'
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var requests []Friendship
+	for rows.Next() {
+		var f Friendship
+
+		err = rows.Scan(&f.SenderID, &f.ReceiverID, &f.CreatedAt, &f.Status)
+		if err != nil {
+			return nil, err
+		}
+
+		requests = append(requests, f)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return requests, nil
+}
+
+func (m FriendshipModel) GetReceivedPendingRequests(id int64) ([]Friendship, error) {
+	query := `
+		SELECT sender_id, receiver_id, created_at, status
+		FROM friendships
+		WHERE receiver_id = $1 AND status = 'pending'
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

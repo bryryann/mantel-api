@@ -113,9 +113,26 @@ func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()
 
+	by := r.URL.Query().Get("by")
+	switch by {
+	case "received", "sent":
+		// do nothing
+	default:
+		by = "sent"
+	}
+
 	user := app.Context.GetUser(r)
 
-	reqs, err := app.Models.Friendships.GetPendingRequests(int64(user.ID))
+	var (
+		reqs []data.Friendship
+		err  error
+	)
+
+	if by == "received" {
+		reqs, err = app.Models.Friendships.GetReceivedPendingRequests(user.ID)
+	} else {
+		reqs, err = app.Models.Friendships.GetSentPendingRequests(user.ID)
+	}
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
