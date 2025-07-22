@@ -65,6 +65,6 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedPost("/v1/friend-requests", sendFriendRequest, ctx)
 	ProtectedPatch("/v1/friend-requests/:id", httpCompatible(ctx, patchPendingFriendRequest), ctx)
 
-	// ProtectedGet("/v1/user/:user_id/friends", getUserFriends,)
+	ProtectedGet("/v1/user/:user_id/friends", httpCompatible(ctx, getFriendsById), ctx)
 
 }
