@@ -12,6 +12,40 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func getFriendsById(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	userIdParam := ps.ByName("user_id")
+	id, err := strconv.Atoi(userIdParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	_, err = app.Models.Users.Exists(int64(id))
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrUserNotFound):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	friends, err := app.Models.Friendships.GetFriends(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"friends": friends}, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
 func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()

@@ -44,6 +44,41 @@ type FriendshipModel struct {
 	DB *sql.DB
 }
 
+func (m FriendshipModel) GetFriends(id int64) ([]UserPublic, error) {
+	query := `
+		SELECT u.id, u.username
+		FROM friendships f
+		JOIN users u ON u.id =
+			CASE
+				WHEN f.sender_id = $1 THEN receiver_id
+				ELSE f.sender_id
+			END
+		WHERE (f.sender_id = $1 OR f.receiver_id = $1)
+			AND f.status = 'accepted'
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var friends []UserPublic
+	for rows.Next() {
+		var f UserPublic
+		if err := rows.Scan(&f.ID, &f.Username); err != nil {
+			return nil, err
+
+		}
+		friends = append(friends, f)
+	}
+
+	return friends, nil
+}
+
 func (m FriendshipModel) SendRequest(fs *Friendship) error {
 	if fs.SenderID == fs.ReceiverID {
 		return ErrFriendshipRequestToSelf
