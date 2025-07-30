@@ -68,10 +68,10 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedGet("/v1/user/:user_id/friends", httpCompatible(ctx, getFriendsById), ctx)
 
 	// posts
-	ProtectedGet("/v1/posts/:post_id", httpCompatible(ctx, findPostByID), ctx)
+	Get("/v1/posts/:post_id", findPostByID)
+	ProtectedPost("/v1/posts", createNewPost, ctx)
 
 	/*
-		ProtectedPost("/v1/posts", newPost, ctx)
 		ProtectedGet("/v1/users/:user_id/posts", getPostsByUserId, ctx)
 		ProtectedGet("/v1/users/:user_id/posts/:post_id", getPostFromUserById, ctx)
 		ProtectedDelete("/v1/posts/:post_id", deletePost, ctx)

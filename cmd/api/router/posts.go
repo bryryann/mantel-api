@@ -42,3 +42,36 @@ func findPostByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		res.ServerErrorResponse(w, r, err)
 	}
 }
+
+func createNewPost(w http.ResponseWriter, r *http.Request) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	var input struct {
+		Content string `json:"content"`
+	}
+
+	err := jsonhttp.ReadJSON(w, r, &input)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	post := &data.Post{
+		UserID:  user.ID,
+		Content: input.Content,
+	}
+
+	err = app.Models.Posts.Insert(post)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"post": post}, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
