@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var (
+	ErrPostNotFound = errors.New("post not found")
+)
+
 type Post struct {
 	ID        int64     `json:"id"`
 	UserID    int64     `json:"user_id"`
@@ -23,7 +27,7 @@ type PostModel struct {
 func (m PostModel) Get(id int64) (*Post, error) {
 	query := `
 		SELECT user_id, content, created_at, updated_at, version
-		FROM users
+		FROM posts
 		WHERE id = $1
 	`
 
