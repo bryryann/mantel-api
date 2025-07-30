@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/bryryann/mantel/backend/internal/validator"
@@ -18,7 +18,7 @@ func getAuthUser(w http.ResponseWriter, r *http.Request) {
 
 	user := app.Context.GetUser(r)
 
-	helpers.WriteJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
+	jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
 }
 
 func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -42,7 +42,7 @@ func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Username: user.Username,
 	}}
 
-	helpers.WriteJSON(w, http.StatusAccepted, env, nil)
+	jsonhttp.WriteJSON(w, http.StatusAccepted, env, nil)
 }
 
 // registerUser handles the HTTP request for registering a new user.
@@ -57,7 +57,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
-	err := helpers.ReadJSON(w, r, &input)
+	err := jsonhttp.ReadJSON(w, r, &input)
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
 		return
@@ -95,7 +95,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = helpers.WriteJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusCreated, envelope{"user": user}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}

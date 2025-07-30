@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
@@ -37,7 +37,7 @@ func findPostByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 	post.ID = int64(postID)
 
-	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"post": post}, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"post": post}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}

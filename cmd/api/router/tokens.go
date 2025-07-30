@@ -8,7 +8,7 @@ import (
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/config"
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/bryryann/mantel/backend/internal/validator"
@@ -28,7 +28,7 @@ func authenticateToken(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
-	err := helpers.ReadJSON(w, r, &input)
+	err := jsonhttp.ReadJSON(w, r, &input)
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
 		return
@@ -78,7 +78,7 @@ func authenticateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = helpers.WriteJSON(w, http.StatusCreated, envelope{"authentication_token": string(jwtBytes)}, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusCreated, envelope{"authentication_token": string(jwtBytes)}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}

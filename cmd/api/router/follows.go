@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
@@ -30,7 +30,7 @@ func followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		FolloweeID int `json:"followee_id"`
 	}
 
-	err = helpers.ReadJSON(w, r, &input)
+	err = jsonhttp.ReadJSON(w, r, &input)
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
 		return
@@ -48,7 +48,7 @@ func followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	err = helpers.WriteJSON(
+	err = jsonhttp.WriteJSON(
 		w,
 		http.StatusCreated,
 		envelope{"follower_id": followerID, "followee_id": input.FolloweeID},
@@ -115,7 +115,7 @@ func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		followers = []data.UserPublic{}
 	}
 
-	helpers.WriteJSON(w, http.StatusAccepted, envelope{"followers": followers}, nil)
+	jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"followers": followers}, nil)
 }
 
 func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -149,5 +149,5 @@ func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		followees = []data.UserPublic{}
 	}
 
-	helpers.WriteJSON(w, http.StatusAccepted, envelope{"followees": followees}, nil)
+	jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"followees": followees}, nil)
 }

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
@@ -40,7 +40,7 @@ func getFriendsById(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		return
 	}
 
-	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"friends": friends}, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"friends": friends}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
@@ -56,7 +56,7 @@ func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 		ReceiverID int `json:"receiver_id"`
 	}
 
-	err := helpers.ReadJSON(w, r, &input)
+	err := jsonhttp.ReadJSON(w, r, &input)
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
 		return
@@ -83,7 +83,7 @@ func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 		"created_at": fs.CreatedAt,
 		"status":     fs.Status,
 	}
-	err = helpers.WriteJSON(w, http.StatusCreated, env, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusCreated, env, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
@@ -106,7 +106,7 @@ func patchPendingFriendRequest(w http.ResponseWriter, r *http.Request, ps httpro
 		Status string `json:"status"`
 	}
 
-	err = helpers.ReadJSON(w, r, &input)
+	err = jsonhttp.ReadJSON(w, r, &input)
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
 		return
@@ -137,7 +137,7 @@ func patchPendingFriendRequest(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"friendship": patched}, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"friendship": patched}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
@@ -172,7 +172,7 @@ func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = helpers.WriteJSON(w, http.StatusAccepted, envelope{"requests": reqs}, nil)
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"requests": reqs}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}

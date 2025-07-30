@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 )
 
 // logError logs the provided error using the logger associated with the Responses struct.
@@ -16,7 +16,7 @@ func (res *Responses) logError(_ *http.Request, err error) {
 // If an error occurs while writing the JSON, it logs the error and sends an internal server error response.
 func (res *Responses) ErrorResponse(w http.ResponseWriter, r *http.Request, status int, message any) {
 	env := map[string]any{"error": message}
-	err := helpers.WriteJSON(w, status, env, nil)
+	err := jsonhttp.WriteJSON(w, status, env, nil)
 	if err != nil {
 		res.logError(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
