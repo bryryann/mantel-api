@@ -73,3 +73,39 @@ func (m PostModel) Insert(post *Post) error {
 
 	return nil
 }
+
+func (m PostModel) Delete(postID int64) error {
+	query := `
+		DELETE FROM posts
+		WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, postID)
+	if err != nil {
+		return err.Err()
+	}
+
+	return nil
+}
+
+func (m PostModel) CheckPostOwnership(postID, userID int64) (bool, error) {
+	var exists bool
+	query := `SELECT 1 FROM posts WHERE id = $1 AND user_id = $2 LIMIT 1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{postID, userID}
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}

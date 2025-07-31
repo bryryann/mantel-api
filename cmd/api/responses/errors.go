@@ -74,3 +74,8 @@ func (res *Responses) AuthenticationRequiredResponse(w http.ResponseWriter, r *h
 	message := "you must be authenticated to access this resource"
 	res.ErrorResponse(w, r, http.StatusUnauthorized, message)
 }
+
+func (res *Responses) NotAuthorizedResponse(w http.ResponseWriter, r *http.Request) {
+	message := "you do not have the permission to access this resource"
+	res.ErrorResponse(w, r, http.StatusForbidden, message)
+}

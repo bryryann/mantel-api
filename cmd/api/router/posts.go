@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -16,9 +17,9 @@ func findPostByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	app := app.Get()
 	res := responses.Get()
 
-	postIDQuery := ps.ByName("post_id")
+	postIDParam := ps.ByName("post_id")
 
-	postID, err := strconv.Atoi(postIDQuery)
+	postID, err := strconv.Atoi(postIDParam)
 	if err != nil {
 		res.BadRequestResponse(w, r, err)
 		return
@@ -71,6 +72,43 @@ func createNewPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"post": post}, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
+func deletePostFromAuthUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	postIDParam := ps.ByName("post_id")
+	postID, err := strconv.Atoi(postIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	exists, err := app.Models.Posts.CheckPostOwnership(int64(postID), user.ID)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if !exists {
+		res.NotAuthorizedResponse(w, r)
+		return
+	}
+
+	err = app.Models.Posts.Delete(int64(postID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	message := fmt.Sprintf("succesfully deleted post with id - %d", postID)
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, message, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
