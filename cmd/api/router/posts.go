@@ -10,6 +10,7 @@ import (
 	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
+	"github.com/bryryann/mantel/backend/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -63,6 +64,12 @@ func createNewPost(w http.ResponseWriter, r *http.Request) {
 	post := &data.Post{
 		UserID:  user.ID,
 		Content: input.Content,
+	}
+
+	v := validator.New()
+	if data.ValidatePost(v, post); !v.Valid() {
+		res.FailedValidationResponse(w, r, v.Errors)
+		return
 	}
 
 	err = app.Models.Posts.Insert(post)

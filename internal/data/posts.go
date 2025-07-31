@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/bryryann/mantel/backend/internal/validator"
 )
 
 var (
@@ -108,4 +110,9 @@ func (m PostModel) CheckPostOwnership(postID, userID int64) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func ValidatePost(v *validator.Validator, post *Post) {
+	v.Check(post.Content != "", "content", "must be provided")
+	v.Check(len(post.Content) <= 500, "content", "must be no more than 500 bytes long")
 }
