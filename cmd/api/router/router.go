@@ -49,29 +49,29 @@ func InitializeRouter(ctx *appcontext.Context) {
 	Get("/v1/healthcheck", httprouterCompatible(ctx, healthCheck))
 
 	// user and authentication
-	ProtectedGet("/v1/users", getAuthUser, ctx)
+	ProtectedGet("/v1/users", getAuthUser, ctx) // add pagination/sorting
 	Get("/v1/users/:user_id", getUserByID)
 	Post("/v1/users", httprouterCompatible(ctx, registerUser))
 	Post("/v1/tokens/authentication", httprouterCompatible(ctx, authenticateToken))
 
 	// follows
-	Get("/v1/users/:user_id/followers", listUserFollowers)
-	Get("/v1/users/:user_id/followees", listUserFollowees)
+	Get("/v1/users/:user_id/followers", listUserFollowers) // add pagination/sorting
+	Get("/v1/users/:user_id/followees", listUserFollowees) // add pagination/sorting
 	ProtectedPost("/v1/users/:follower_id/follow", httpCompatible(ctx, followUser), ctx)
 	ProtectedPost("/v1/users/:follower_id/unfollow/:followee_id", httpCompatible(ctx, unfollowUser), ctx)
 
 	// friendships
-	ProtectedGet("/v1/friend-requests", listPendingRequests, ctx)
+	ProtectedGet("/v1/friend-requests", listPendingRequests, ctx) // add pagination/sorting
 	ProtectedPost("/v1/friend-requests", sendFriendRequest, ctx)
 	ProtectedPatch("/v1/friend-requests/:id", httpCompatible(ctx, patchPendingFriendRequest), ctx)
 
-	ProtectedGet("/v1/user/:user_id/friends", httpCompatible(ctx, getFriendsById), ctx)
+	ProtectedGet("/v1/user/:user_id/friends", httpCompatible(ctx, getFriendsById), ctx) // add pagination/sorting
 
 	// posts
 	Get("/v1/posts/:post_id", findPostByID)
 	ProtectedPost("/v1/posts", createNewPost, ctx)
 	ProtectedDelete("/v1/posts/:post_id", httpCompatible(ctx, deletePostFromAuthUser), ctx)
-	ProtectedGet("/v1/users/:user_id/posts", httpCompatible(ctx, getPostsFromUser), ctx)
+	ProtectedGet("/v1/users/:user_id/posts", httpCompatible(ctx, getPostsFromUser), ctx) // add pagination/sorting
 
 	/*
 		ProtectedGet("/v1/users/:user_id/posts/:post_id", getPostFromUserById, ctx)
