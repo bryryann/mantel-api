@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	_ "github.com/bryryann/mantel/backend/internal/mapper"
 	"github.com/bryryann/mantel/backend/internal/validator"
 )
 
@@ -20,6 +21,20 @@ type Post struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"-"`
 	Version   int       `json:"-"`
+}
+
+func (p Post) ToPublic() any {
+	return PostPublic{
+		ID:        p.ID,
+		Content:   p.Content,
+		CreatedAt: p.CreatedAt,
+	}
+}
+
+type PostPublic struct {
+	ID        int64     `json:"id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type PostModel struct {
@@ -90,6 +105,38 @@ func (m PostModel) Delete(postID int64) error {
 	}
 
 	return nil
+}
+
+func (m PostModel) GetFromUser(userID int64) ([]PostPublic, error) {
+	query := `
+		SELECT id, content, created_at
+		FROM posts
+		WHERE user_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []PostPublic
+	for rows.Next() {
+		var p PostPublic
+		if err := rows.Scan(&p.ID, &p.Content, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 
 func (m PostModel) CheckPostOwnership(postID, userID int64) (bool, error) {

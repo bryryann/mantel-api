@@ -45,6 +45,33 @@ func findPostByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 }
 
+func getPostsFromUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	userIDParam := ps.ByName("user_id")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	posts, err := app.Models.Posts.GetFromUser(int64(userID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if posts == nil {
+		posts = []data.PostPublic{}
+	}
+
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"posts": posts}, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
 func createNewPost(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()

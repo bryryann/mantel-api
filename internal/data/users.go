@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	_ "github.com/bryryann/mantel/backend/internal/mapper"
 	"github.com/bryryann/mantel/backend/internal/validator"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,6 +31,14 @@ type User struct {
 	Email     string    `json:"email"`
 	Password  password  `json:"-"`
 	Version   int       `json:"-"`
+}
+
+// ToPublic maps a variable of type User to UserPublic.
+func (u User) ToPublic() any {
+	return UserPublic{
+		ID:       u.ID,
+		Username: u.Username,
+	}
 }
 
 // UserPublic contains no sensitive information about user. Safe for public exposure.
