@@ -107,7 +107,7 @@ func (m PostModel) Delete(postID int64) error {
 	return nil
 }
 
-func (m PostModel) GetFromUser(userID int64) ([]PostPublic, error) {
+func (m PostModel) SelectAllFromUser(userID int64) ([]PostPublic, error) {
 	query := `
 		SELECT id, content, created_at
 		FROM posts
@@ -137,6 +137,34 @@ func (m PostModel) GetFromUser(userID int64) ([]PostPublic, error) {
 	}
 
 	return posts, nil
+}
+
+func (m PostModel) FindByIDFromUser(postID, userID int64) (*Post, error) {
+	query := `
+		SELECT id, user_id, content, created_at, updated_at, version
+		FROM posts 
+		WHERE id = $1 AND user_id = $2
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{postID, userID}
+
+	var post Post
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&post.ID,
+		&post.UserID,
+		&post.Content,
+		&post.CreatedAt,
+		&post.UpdatedAt,
+		&post.Version,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &post, nil
 }
 
 func (m PostModel) CheckPostOwnership(postID, userID int64) (bool, error) {
