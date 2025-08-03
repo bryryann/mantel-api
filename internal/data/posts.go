@@ -167,6 +167,33 @@ func (m PostModel) FindByIDFromUser(postID, userID int64) (*Post, error) {
 	return &post, nil
 }
 
+func (m PostModel) PatchPost(post *Post) (*Post, error) {
+	query := `
+		UPDATE posts
+		SET content = $3, updated_at = $4
+		WHERE id = $1 AND user_id = $2
+		RETURNING updated_at
+	`
+
+	args := []any{
+		post.ID,
+		post.UserID,
+		post.Content,
+		time.Now(),
+	}
+
+	patched := *post
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&patched.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &patched, nil
+}
+
 func (m PostModel) CheckPostOwnership(postID, userID int64) (bool, error) {
 	var exists bool
 	query := `SELECT 1 FROM posts WHERE id = $1 AND user_id = $2 LIMIT 1`
@@ -182,6 +209,28 @@ func (m PostModel) CheckPostOwnership(postID, userID int64) (bool, error) {
 			return false, nil
 		}
 		return false, err
+	}
+
+	return true, nil
+}
+
+func (m PostModel) Exists(postID int64) (bool, error) {
+	checkQuery := `
+		SELECT COUNT(*) FROM posts
+		WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	err := m.DB.QueryRowContext(ctx, checkQuery, postID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	if count == 0 {
+		return false, nil
 	}
 
 	return true, nil

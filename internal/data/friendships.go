@@ -105,7 +105,7 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 }
 
 func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
-	exists, err := requestExists(m.DB, fs)
+	exists, err := friendshipRequestExists(m.DB, fs)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (m FriendshipModel) GetReceivedPendingRequests(id int64) ([]Friendship, err
 	return requests, nil
 }
 
-func requestExists(db *sql.DB, fs *Friendship) (bool, error) {
+func friendshipRequestExists(db *sql.DB, fs *Friendship) (bool, error) {
 	checkQuery := `
 		SELECT COUNT(*) FROM friendships
 		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'

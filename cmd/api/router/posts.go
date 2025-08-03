@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
 	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
@@ -178,6 +179,67 @@ func deletePostFromAuthUser(w http.ResponseWriter, r *http.Request, ps httproute
 
 	message := fmt.Sprintf("succesfully deleted post with id - %d", postID)
 	err = jsonhttp.WriteJSON(w, http.StatusAccepted, message, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
+func editPostContent(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	postID, err := strconv.Atoi(ps.ByName("post_id"))
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	var input struct {
+		Content string `json:"content"`
+	}
+
+	err = jsonhttp.ReadJSON(w, r, &input)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	if strings.TrimSpace(input.Content) == "" {
+		res.BadRequestResponse(w, r, errors.New("content must not be empty"))
+		return
+	}
+
+	userOwned, err := app.Models.Posts.CheckPostOwnership(int64(postID), user.ID)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if !userOwned {
+		res.NotAuthorizedResponse(w, r)
+		return
+	}
+
+	patchedPost := &data.Post{
+		ID:      int64(postID),
+		UserID:  user.ID,
+		Content: input.Content,
+	}
+
+	patchedPost, err = app.Models.Posts.PatchPost(patchedPost)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = jsonhttp.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
