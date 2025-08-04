@@ -12,7 +12,7 @@ such as user authentication, posts, likes, follows, friendships and more.
 | Feature | Status | Notes |
 |---------|--------|-------|
 | User Authentication | ✅ Completed | JWT-based login and registration |
-| Posts | 🟡 In Progress | Basic creation works; delete and search by ID works | 
+| Posts | 🧪 Implemented | Basic creation works; delete and search by ID works | 
 | Likes | ❌ Not started | Feature planned, not yet implemented; posts need to work properly first |
 | Follows | 🧪 Implemented | Users can follow/unfollow each other; not properly tested |
 | Friendships | 🧪 Implemented | Friendship relations can be formed; not properly tested |
