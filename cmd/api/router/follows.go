@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
@@ -105,7 +106,16 @@ func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	followers, err := app.Models.Follows.GetFollowers(int64(id))
+	query := r.URL.Query()
+
+	page := helpers.ParseIntOrDefault(query.Get("page"), 1)
+	pageSize := helpers.ParseIntOrDefault(query.Get("page_size"), 20)
+	sort := query.Get("sort")
+	if sort == "" {
+		sort = "username_asc"
+	}
+
+	followers, err := app.Models.Follows.GetFollowers(int64(id), page, pageSize, sort)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
@@ -115,7 +125,14 @@ func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		followers = []data.UserPublic{}
 	}
 
-	jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"followers": followers}, nil)
+	jsonResponse := envelope{
+		"followers": followers,
+		"meta": map[string]any{
+			"page":      page,
+			"page_size": pageSize,
+		},
+	}
+	jsonhttp.WriteJSON(w, http.StatusAccepted, jsonResponse, nil)
 }
 
 func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

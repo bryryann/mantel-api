@@ -31,3 +31,10 @@ func GetEnvInt(key string, defaultValue int) (int, error) {
 
 	return i, nil
 }
+
+func ParseIntOrDefault(s string, defaultVal int) int {
+	if v, err := strconv.Atoi(s); err == nil && v > 0 {
+		return v
+	}
+	return defaultVal
+}
