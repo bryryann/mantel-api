@@ -156,7 +156,16 @@ func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	followees, err := app.Models.Follows.GetFollowees(int64(id))
+	query := r.URL.Query()
+
+	page := helpers.ParseIntOrDefault(query.Get("page"), 1)
+	pageSize := helpers.ParseIntOrDefault(query.Get("page_size"), 20)
+	sort := query.Get("sort")
+	if sort == "" {
+		sort = "username_asc"
+	}
+
+	followees, err := app.Models.Follows.GetFollowees(int64(id), page, pageSize, sort)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
@@ -166,5 +175,12 @@ func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		followees = []data.UserPublic{}
 	}
 
-	jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"followees": followees}, nil)
+	jsonResponse := envelope{
+		"followees": followees,
+		"meta": map[string]any{
+			"page":      page,
+			"page_size": pageSize,
+		},
+	}
+	jsonhttp.WriteJSON(w, http.StatusAccepted, jsonResponse, nil)
 }

@@ -108,17 +108,33 @@ func (m FollowsModel) GetFollowers(userID int64, page, pageSize int, sort string
 }
 
 // GetFollowers returns a slice with every follow by the user with given id.
-func (m FollowsModel) GetFollowees(id int64) ([]UserPublic, error) {
-	query := `
+func (m FollowsModel) GetFollowees(userID int64, page, pageSize int, sort string) ([]UserPublic, error) {
+	offset := (page - 1) * pageSize
+
+	var sortColumn string
+	switch sort {
+	case "username_asc":
+		sortColumn = "u.username ASC"
+	case "username_desc":
+		sortColumn = "u.username DESC"
+	default:
+		sortColumn = "u.username ASC"
+	}
+
+	query := fmt.Sprintf(`
 		SELECT u.id, u.username
 		FROM follows f
 		JOIN users u ON f.followee_id = u.id
-		WHERE f.follower_id = $1`
+		WHERE f.follower_id = $1
+		ORDER BY %s
+		LIMIT $2 OFFSET $3`, sortColumn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, id)
+	args := []any{userID, pageSize, offset}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -138,5 +154,4 @@ func (m FollowsModel) GetFollowees(id int64) ([]UserPublic, error) {
 	}
 
 	return followees, nil
-
 }

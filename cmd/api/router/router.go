@@ -55,7 +55,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 	Post("/v1/tokens/authentication", httprouterCompatible(ctx, authenticateToken))
 
 	// follows
-	Get("/v1/users/:user_id/followers", listUserFollowers) // add pagination/sorting
+	Get("/v1/users/:user_id/followers", listUserFollowers)
 	Get("/v1/users/:user_id/followees", listUserFollowees) // add pagination/sorting
 	ProtectedPost("/v1/users/:follower_id/follow", httpCompatible(ctx, followUser), ctx)
 	ProtectedPost("/v1/users/:follower_id/unfollow/:followee_id", httpCompatible(ctx, unfollowUser), ctx)
