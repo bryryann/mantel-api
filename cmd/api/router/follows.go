@@ -115,7 +115,12 @@ func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		sort = "username_asc"
 	}
 
-	followers, err := app.Models.Follows.GetFollowers(int64(id), page, pageSize, sort)
+	paginationData := data.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+		Sort:     sort,
+	}
+	followers, err := app.Models.Follows.GetFollowers(int64(id), paginationData)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
@@ -165,7 +170,12 @@ func listUserFollowees(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		sort = "username_asc"
 	}
 
-	followees, err := app.Models.Follows.GetFollowees(int64(id), page, pageSize, sort)
+	paginationData := data.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+		Sort:     sort,
+	}
+	followees, err := app.Models.Follows.GetFollowees(int64(id), paginationData)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return

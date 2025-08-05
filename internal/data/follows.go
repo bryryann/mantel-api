@@ -59,11 +59,12 @@ func (m FollowsModel) Delete(followerID, followeeID int64) error {
 }
 
 // GetFollowers returns a slice with every follower that user with related id has.
-func (m FollowsModel) GetFollowers(userID int64, page, pageSize int, sort string) ([]UserPublic, error) {
-	offset := (page - 1) * pageSize
-
+func (m FollowsModel) GetFollowers(
+	userID int64,
+	pagination Pagination,
+) ([]UserPublic, error) {
 	var sortColumn string
-	switch sort {
+	switch pagination.Sort {
 	case "username_asc":
 		sortColumn = "u.username ASC"
 	case "username_desc":
@@ -83,7 +84,7 @@ func (m FollowsModel) GetFollowers(userID int64, page, pageSize int, sort string
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []any{userID, pageSize, offset}
+	args := []any{userID, pagination.PageSize, pagination.Offset()}
 
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -108,11 +109,12 @@ func (m FollowsModel) GetFollowers(userID int64, page, pageSize int, sort string
 }
 
 // GetFollowers returns a slice with every follow by the user with given id.
-func (m FollowsModel) GetFollowees(userID int64, page, pageSize int, sort string) ([]UserPublic, error) {
-	offset := (page - 1) * pageSize
-
+func (m FollowsModel) GetFollowees(
+	userID int64,
+	pagination Pagination,
+) ([]UserPublic, error) {
 	var sortColumn string
-	switch sort {
+	switch pagination.Sort {
 	case "username_asc":
 		sortColumn = "u.username ASC"
 	case "username_desc":
@@ -132,7 +134,7 @@ func (m FollowsModel) GetFollowees(userID int64, page, pageSize int, sort string
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []any{userID, pageSize, offset}
+	args := []any{userID, pagination.PageSize, pagination.Offset()}
 
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {

@@ -10,6 +10,16 @@ var (
 	ErrRecordNotFound = errors.New("record not found")
 )
 
+type Pagination struct {
+	Page     int
+	PageSize int
+	Sort     string
+}
+
+func (pp *Pagination) Offset() int {
+	return (pp.Page - 1) * pp.PageSize
+}
+
 // Models is a container struct that holds all the individual
 // database models used throughout the application.
 type Models struct {
