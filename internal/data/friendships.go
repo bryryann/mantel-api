@@ -44,7 +44,10 @@ type FriendshipModel struct {
 	DB *sql.DB
 }
 
-func (m FriendshipModel) GetFriends(id int64) ([]UserPublic, error) {
+func (m FriendshipModel) GetFriends(
+	userID int64,
+	pagination Pagination,
+) ([]UserPublic, error) {
 	query := `
 		SELECT u.id, u.username
 		FROM friendships f
@@ -55,12 +58,15 @@ func (m FriendshipModel) GetFriends(id int64) ([]UserPublic, error) {
 			END
 		WHERE (f.sender_id = $1 OR f.receiver_id = $1)
 			AND f.status = 'accepted'
+		LIMIT $2 OFFSET $3
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, id)
+	args := []any{userID, pagination.PageSize, pagination.Offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

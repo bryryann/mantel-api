@@ -24,6 +24,11 @@ func getFriendsById(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		return
 	}
 
+	query := r.URL.Query()
+
+	page := helpers.ParseIntOrDefault(query.Get("page"), 1)
+	pageSize := helpers.ParseIntOrDefault(query.Get("page_size"), 20)
+
 	_, err = app.Models.Users.Exists(int64(id))
 	if err != nil {
 		switch {
@@ -35,13 +40,25 @@ func getFriendsById(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		return
 	}
 
-	friends, err := app.Models.Friendships.GetFriends(int64(id))
+	paginationData := data.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+	}
+
+	friends, err := app.Models.Friendships.GetFriends(int64(id), paginationData)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
 	}
 
-	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"friends": friends}, nil)
+	jsonResponse := envelope{
+		"friends": friends,
+		"meta": map[string]any{
+			"page":      page,
+			"page_size": pageSize,
+		},
+	}
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, jsonResponse, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
