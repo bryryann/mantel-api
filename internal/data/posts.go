@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/bryryann/mantel/backend/internal/mapper"
@@ -107,17 +109,34 @@ func (m PostModel) Delete(postID int64) error {
 	return nil
 }
 
-func (m PostModel) SelectAllFromUser(userID int64) ([]PostPublic, error) {
-	query := `
+func (m PostModel) SelectAllFromUser(
+	userID int64,
+	pagination Pagination,
+) ([]PostPublic, error) {
+	var sortColumn string
+	switch strings.ToLower(pagination.Sort) {
+	case "asc", "oldest", "old":
+		sortColumn = "created_at ASC"
+	case "desc", "newest", "new":
+		sortColumn = "created_at DESC"
+	default:
+		sortColumn = "created_at ASC"
+	}
+
+	query := fmt.Sprintf(`
 		SELECT id, content, created_at
 		FROM posts
 		WHERE user_id = $1
-	`
+		ORDER BY %s
+		LIMIT $2 OFFSET $3
+	`, sortColumn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, userID)
+	args := []any{userID, pagination.PageSize, pagination.Offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

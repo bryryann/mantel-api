@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
@@ -92,7 +93,19 @@ func getPostsFromUser(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		return
 	}
 
-	posts, err := app.Models.Posts.SelectAllFromUser(int64(userID))
+	query := r.URL.Query()
+
+	page := helpers.ParseIntOrDefault(query.Get("page"), 1)
+	pageSize := helpers.ParseIntOrDefault(query.Get("page_size"), 20)
+	sort := query.Get("sort")
+
+	paginationData := data.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+		Sort:     sort,
+	}
+
+	posts, err := app.Models.Posts.SelectAllFromUser(int64(userID), paginationData)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
@@ -102,7 +115,14 @@ func getPostsFromUser(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		posts = []data.PostPublic{}
 	}
 
-	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"posts": posts}, nil)
+	jsonResponse := envelope{
+		"posts": posts,
+		"meta": map[string]any{
+			"page":      page,
+			"page_size": pageSize,
+		},
+	}
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, jsonResponse, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
