@@ -17,6 +17,9 @@ type Pagination struct {
 }
 
 func (pp *Pagination) Offset() int {
+	if pp.Page < 1 {
+		return 0
+	}
 	return (pp.Page - 1) * pp.PageSize
 }
 
