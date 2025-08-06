@@ -140,17 +140,22 @@ func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
 
 }
 
-func (m FriendshipModel) GetSentPendingRequests(id int64) ([]Friendship, error) {
+func (m FriendshipModel) GetSentPendingRequests(
+	senderID int64,
+	pagination Pagination,
+) ([]Friendship, error) {
 	query := `
 		SELECT sender_id, receiver_id, created_at, status
 		FROM friendships
 		WHERE sender_id = $1 AND status = 'pending'
-	`
+		LIMIT $2 OFFSET $3`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, id)
+	args := []any{senderID, pagination.PageSize, pagination.Offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -175,17 +180,22 @@ func (m FriendshipModel) GetSentPendingRequests(id int64) ([]Friendship, error) 
 	return requests, nil
 }
 
-func (m FriendshipModel) GetReceivedPendingRequests(id int64) ([]Friendship, error) {
+func (m FriendshipModel) GetReceivedPendingRequests(
+	receiverID int64,
+	pagination Pagination,
+) ([]Friendship, error) {
 	query := `
 		SELECT sender_id, receiver_id, created_at, status
 		FROM friendships
 		WHERE receiver_id = $1 AND status = 'pending'
-	`
+		LIMIT $2 OFFSET $3`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, id)
+	args := []any{receiverID, pagination.PageSize, pagination.Offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

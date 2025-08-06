@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
@@ -147,13 +148,18 @@ func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()
 
-	by := r.URL.Query().Get("by")
+	query := r.URL.Query()
+
+	by := query.Get("by")
 	switch by {
 	case "received", "sent":
 		// do nothing
 	default:
 		by = "sent"
 	}
+
+	page := helpers.ParseIntOrDefault(query.Get("page"), 1)
+	pageSize := helpers.ParseIntOrDefault(query.Get("page_size"), 20)
 
 	user := app.Context.GetUser(r)
 
@@ -162,17 +168,28 @@ func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 		err  error
 	)
 
+	paginationData := data.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+	}
 	if by == "received" {
-		reqs, err = app.Models.Friendships.GetReceivedPendingRequests(user.ID)
+		reqs, err = app.Models.Friendships.GetReceivedPendingRequests(user.ID, paginationData)
 	} else {
-		reqs, err = app.Models.Friendships.GetSentPendingRequests(user.ID)
+		reqs, err = app.Models.Friendships.GetSentPendingRequests(user.ID, paginationData)
 	}
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 		return
 	}
 
-	err = jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"requests": reqs}, nil)
+	jsonResponse := envelope{
+		"requests": reqs,
+		"meta": map[string]any{
+			"page":      page,
+			"page_size": pageSize,
+		},
+	}
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, jsonResponse, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
