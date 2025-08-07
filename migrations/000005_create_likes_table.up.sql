@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS likes (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    created_at TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT unique_like UNIQUE(user_id, post_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_likes_user_id ON likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_likes_post_id ON likes(post_id);

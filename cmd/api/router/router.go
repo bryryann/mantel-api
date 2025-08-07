@@ -72,6 +72,6 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedPost("/v1/posts", createNewPost, ctx)
 	ProtectedDelete("/v1/posts/:post_id", httpCompatible(ctx, deletePostFromAuthUser), ctx)
 	ProtectedPatch("/v1/posts/:post_id", httpCompatible(ctx, editPostContent), ctx)
-	Get("/v1/users/:user_id/posts", getPostsFromUser) // add pagination/sorting
+	Get("/v1/users/:user_id/posts", getPostsFromUser)
 	Get("/v1/users/:user_id/posts/:post_id", findPostByIDFromUser)
 }
