@@ -30,6 +30,7 @@ type Models struct {
 	Follows     FollowsModel
 	Friendships FriendshipModel
 	Posts       PostModel
+	Likes       LikeModel
 }
 
 // NewModels initializes and returns a new Models struct,
@@ -40,6 +41,7 @@ func NewModels(db *sql.DB) *Models {
 		Follows:     FollowsModel{DB: db},
 		Friendships: FriendshipModel{DB: db},
 		Posts:       PostModel{DB: db},
+		Likes:       LikeModel{DB: db},
 	}
 }
 
@@ -57,6 +59,9 @@ func MockModels() *Models {
 			DB: nil,
 		},
 		Posts: PostModel{
+			DB: nil,
+		},
+		Likes: LikeModel{
 			DB: nil,
 		},
 	}
