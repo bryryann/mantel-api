@@ -74,4 +74,11 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedPatch("/v1/posts/:post_id", httpCompatible(ctx, editPostContent), ctx)
 	Get("/v1/users/:user_id/posts", getPostsFromUser)
 	Get("/v1/users/:user_id/posts/:post_id", findPostByIDFromUser)
+
+	// likes
+	ProtectedPost("/v1/posts/:post_id/likes", httpCompatible(ctx, likePost), ctx)
+
+	// ProtectedDelete("/v1/posts/:post_id/likes", unlikePost)
+	// Get("/v1/posts/:post_id/likes", listLikesOnPost) //pagination/sorting
+	// Get("/v1/posts/:post_id/likes/count", getPostLikeCount)
 }
