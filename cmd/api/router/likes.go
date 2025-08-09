@@ -161,3 +161,38 @@ func listLikesOnPost(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		res.ServerErrorResponse(w, r, err)
 	}
 }
+
+func countLikesFromPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	postIDParam := ps.ByName("post_id")
+	postID, err := strconv.Atoi(postIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	exists, err := app.Models.Posts.Exists(int64(postID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if !exists {
+		res.NotFoundResponse(w, r)
+		return
+	}
+
+	count, err := app.Models.Likes.CountLikes(int64(postID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	jsonResponse := envelope{"likes_count": count}
+	err = jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}

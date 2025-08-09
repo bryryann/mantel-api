@@ -130,3 +130,22 @@ func (m *LikeModel) ListLikesFromPost(
 
 	return likes, err
 }
+
+func (m *LikeModel) CountLikes(postID int64) (int, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM likes
+		WHERE post_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	err := m.DB.QueryRowContext(ctx, query, postID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
