@@ -46,3 +46,31 @@ func (m *LikeModel) Like(userID, postID int64) (*Like, error) {
 
 	return &like, nil
 }
+
+func (m *LikeModel) Dislike(userID, postID int64) error {
+	query := `
+		DELETE FROM likes
+		WHERE user_id = $1 AND post_id = $2
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{userID, postID}
+
+	res, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
