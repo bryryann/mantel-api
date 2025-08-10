@@ -1,5 +1,11 @@
 include .envrc
 
+.PHONY: build
+build:
+	@echo 'Building binary into bin/...'
+	@mkdir -p bin
+	GOOS=linux GOARCH=amd64 go build -o bin/api ./cmd/api
+
 .PHONY: run/api
 run/api:
 	go run ./cmd/api

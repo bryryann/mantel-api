@@ -32,6 +32,7 @@ node_modules
 dist
 dist-ssr
 *.local
+bin
 
 # SSL Certificates (local development only)
 certs/
