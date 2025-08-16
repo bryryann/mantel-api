@@ -4,7 +4,6 @@
     "lib": ["ES2023"],
 
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
 
