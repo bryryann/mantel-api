@@ -6,7 +6,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryanznk/mantel/backend/cmd/api/helpers"
 )
 
 type JWT struct {

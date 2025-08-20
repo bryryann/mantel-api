@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bryryann/mantel/backend/cmd/api/app"
-	"github.com/bryryann/mantel/backend/cmd/api/helpers"
-	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
-	"github.com/bryryann/mantel/backend/cmd/api/responses"
-	"github.com/bryryann/mantel/backend/internal/data"
+	"github.com/bryanznk/mantel/backend/cmd/api/app"
+	"github.com/bryanznk/mantel/backend/cmd/api/helpers"
+	"github.com/bryanznk/mantel/backend/cmd/api/jsonhttp"
+	"github.com/bryanznk/mantel/backend/cmd/api/responses"
+	"github.com/bryanznk/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 

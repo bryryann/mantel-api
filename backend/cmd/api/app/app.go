@@ -8,11 +8,11 @@ import (
 	"os"
 	"sync"
 
-	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
-	"github.com/bryryann/mantel/backend/cmd/api/config"
-	"github.com/bryryann/mantel/backend/cmd/api/database"
-	"github.com/bryryann/mantel/backend/cmd/api/responses"
-	"github.com/bryryann/mantel/backend/internal/data"
+	"github.com/bryanznk/mantel/backend/cmd/api/appcontext"
+	"github.com/bryanznk/mantel/backend/cmd/api/config"
+	"github.com/bryanznk/mantel/backend/cmd/api/database"
+	"github.com/bryanznk/mantel/backend/cmd/api/responses"
+	"github.com/bryanznk/mantel/backend/internal/data"
 )
 
 // App is the application container that holds:

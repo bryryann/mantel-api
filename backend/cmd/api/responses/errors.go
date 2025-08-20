@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
+	"github.com/bryanznk/mantel/backend/cmd/api/jsonhttp"
 )
 
 // logError logs the provided error using the logger associated with the Responses struct.

@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
-	"github.com/bryryann/mantel/backend/cmd/api/config"
-	"github.com/bryryann/mantel/backend/cmd/api/responses"
-	"github.com/bryryann/mantel/backend/internal/data"
+	"github.com/bryanznk/mantel/backend/cmd/api/appcontext"
+	"github.com/bryanznk/mantel/backend/cmd/api/config"
+	"github.com/bryanznk/mantel/backend/cmd/api/responses"
+	"github.com/bryanznk/mantel/backend/internal/data"
 )
 
 // authenticate is a middleware function that validates the JWT token from the Authorization header.

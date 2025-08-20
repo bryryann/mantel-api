@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	_ "github.com/bryryann/mantel/backend/internal/mapper"
-	"github.com/bryryann/mantel/backend/internal/validator"
+	_ "github.com/bryanznk/mantel/backend/internal/mapper"
+	"github.com/bryanznk/mantel/backend/internal/validator"
 	"golang.org/x/crypto/bcrypt"
 )
 
