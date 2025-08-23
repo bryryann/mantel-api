@@ -78,7 +78,11 @@ func authenticateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = jsonhttp.WriteJSON(w, http.StatusCreated, envelope{"authentication_token": string(jwtBytes)}, nil)
+	jsonResponse := envelope{
+		"access_token": string(jwtBytes),
+		"user":         user,
+	}
+	err = jsonhttp.WriteJSON(w, http.StatusCreated, jsonResponse, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
 	}
