@@ -13,6 +13,7 @@ import (
 	"github.com/bryanznk/mantel/backend/cmd/api/router"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 const ascii = `
@@ -55,11 +56,19 @@ func main() {
 // startServer contains all code related to api initialization.
 func startServer() {
 	app := app.Get()
-	router := router.SetupRouter(app.Context, app.Models)
+	// router := router.SetupRouter(app.Context, app.Models)
+	baseRouter := router.SetupRouter(app.Context, app.Models)
+
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{helpers.GetEnvString("CLIENT_API", "http://localhost:5173")},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+	}).Handler(baseRouter)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.Config.Port),
-		Handler:      router,
+		Handler:      corsHandler,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
