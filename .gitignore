@@ -8,6 +8,7 @@
 *.test
 
 *.out
+bin
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -18,33 +19,3 @@ go.work.sum
 .env
 .env.local
 .envrc
-
-# Frontend related files.
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-bin
-
-# SSL Certificates (local development only)
-certs/
-*.pem
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
