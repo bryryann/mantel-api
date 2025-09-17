@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/bryanznk/mantel/backend/internal/mapper"
-	"github.com/bryanznk/mantel/backend/internal/validator"
+	_ "github.com/bryryann/mantel/backend/internal/mapper"
+	"github.com/bryryann/mantel/backend/internal/validator"
 )
 
 var (

@@ -3,9 +3,9 @@ package router
 import (
 	"net/http"
 
-	"github.com/bryanznk/mantel/backend/cmd/api/appcontext"
-	"github.com/bryanznk/mantel/backend/cmd/api/helpers"
-	"github.com/bryanznk/mantel/backend/cmd/api/middleware"
+	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
+	"github.com/bryryann/mantel/backend/cmd/api/middleware"
 	"github.com/julienschmidt/httprouter"
 )
 

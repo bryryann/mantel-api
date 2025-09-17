@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bryanznk/mantel/backend/cmd/api/appcontext"
-	"github.com/bryanznk/mantel/backend/cmd/api/config"
-	"github.com/bryanznk/mantel/backend/internal/data"
+	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
+	"github.com/bryryann/mantel/backend/cmd/api/config"
+	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/pascaldekloe/jwt"
 )
 

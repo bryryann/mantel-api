@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bryanznk/mantel/backend/internal/data"
+	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 

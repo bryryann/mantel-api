@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bryanznk/mantel/backend/cmd/api/app"
-	"github.com/bryanznk/mantel/backend/cmd/api/config"
-	"github.com/bryanznk/mantel/backend/cmd/api/jsonhttp"
-	"github.com/bryanznk/mantel/backend/cmd/api/responses"
-	"github.com/bryanznk/mantel/backend/internal/data"
-	"github.com/bryanznk/mantel/backend/internal/validator"
+	"github.com/bryryann/mantel/backend/cmd/api/app"
+	"github.com/bryryann/mantel/backend/cmd/api/config"
+	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
+	"github.com/bryryann/mantel/backend/cmd/api/responses"
+	"github.com/bryryann/mantel/backend/internal/data"
+	"github.com/bryryann/mantel/backend/internal/validator"
 	"github.com/pascaldekloe/jwt"
 )
 

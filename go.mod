@@ -1,4 +1,4 @@
-module github.com/bryanznk/mantel/backend
+module github.com/bryryann/mantel/backend
 
 go 1.24.0
 

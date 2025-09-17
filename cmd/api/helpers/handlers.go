@@ -3,7 +3,7 @@ package helpers
 import (
 	"net/http"
 
-	"github.com/bryanznk/mantel/backend/cmd/api/appcontext"
+	"github.com/bryryann/mantel/backend/cmd/api/appcontext"
 	"github.com/julienschmidt/httprouter"
 )
 
