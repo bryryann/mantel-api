@@ -108,6 +108,28 @@ func (m FollowsModel) GetFollowers(
 	return followers, nil
 }
 
+func (m FollowsModel) Exists(followerID, followeeID int64) (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS (
+			SELECT 1 FROM follows
+			WHERE follower_id = $1 AND followee_id = $2
+		)
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{followerID, followeeID}
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
 // GetFollowers returns a slice with every follow by the user with given id.
 func (m FollowsModel) GetFollowees(
 	userID int64,

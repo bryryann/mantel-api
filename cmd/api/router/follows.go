@@ -85,6 +85,35 @@ func unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	w.WriteHeader(http.StatusAccepted)
 }
 
+func checkFollowStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	userIDParam := ps.ByName("user_id")
+	followeeIDParam := ps.ByName("user_id")
+
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	followeeID, err := strconv.Atoi(followeeIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	isFollowing, err := app.Models.Follows.Exists(int64(userID), int64(followeeID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	jsonResponse := envelope{"is_following": isFollowing}
+	jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
+}
+
 func listUserFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
