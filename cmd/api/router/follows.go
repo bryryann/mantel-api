@@ -37,11 +37,32 @@ func followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	// TODO: Add validation
-	// - Verify whether follower_id/followee_id actually represents a registered user
-	// ...
-	// ...
-	// ...
+	followerExists, err := app.Models.Users.Exists(int64(followerID))
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrUserNotFound):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	followeeExists, err := app.Models.Users.Exists(int64(input.FolloweeID))
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrUserNotFound):
+			res.NotFoundResponse(w, r)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	if !followerExists || !followeeExists {
+		res.NotFoundResponse(w, r)
+		return
+	}
 
 	err = app.Models.Follows.Insert(int64(followerID), int64(input.FolloweeID))
 	if err != nil {
