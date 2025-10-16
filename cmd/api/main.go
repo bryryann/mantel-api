@@ -62,7 +62,7 @@ func startServer() {
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{helpers.GetEnvString("CLIENT_API", "http://localhost:5173")},
 		AllowCredentials: true,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 	}).Handler(baseRouter)
 
