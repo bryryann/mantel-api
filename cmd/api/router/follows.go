@@ -111,7 +111,7 @@ func checkFollowStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	res := responses.Get()
 
 	userIDParam := ps.ByName("user_id")
-	followeeIDParam := ps.ByName("user_id")
+	followeeIDParam := ps.ByName("followee_id")
 
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
