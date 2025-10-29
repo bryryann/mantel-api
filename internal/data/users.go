@@ -43,8 +43,9 @@ func (u User) ToPublic() any {
 
 // UserPublic contains no sensitive information about user. Safe for public exposure.
 type UserPublic struct {
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
+	ID         int64      `json:"id"`
+	Username   string     `json:"username"`
+	FollowData FollowData `json:"follow_data"`
 }
 
 // IsAnonymous returns true if the user is the predefined AnonymousUser.

@@ -14,6 +14,11 @@ type Follows struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+type FollowData struct {
+	FollowersCount int64 `json:"followers_count"`
+	FollowingCount int64 `json:"following_count"`
+}
+
 type FollowsModel struct {
 	DB *sql.DB
 }
@@ -106,6 +111,25 @@ func (m FollowsModel) GetFollowers(
 	}
 
 	return followers, nil
+}
+
+func (m FollowsModel) GetFollowData(userID int64) (FollowData, error) {
+	query := `
+		SELECT
+			(SELECT COUNT(*) FROM follows WHERE followee_id = $1) AS followers_count,
+			(SELECT COUNT(*) FROM follows WHERE follower_id = $1) AS following_count;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var data FollowData
+	err := m.DB.QueryRowContext(ctx, query, userID).Scan(&data.FollowersCount, &data.FollowingCount)
+	if err != nil {
+		return FollowData{}, err
+	}
+
+	return data, nil
 }
 
 func (m FollowsModel) Exists(followerID, followeeID int64) (bool, error) {

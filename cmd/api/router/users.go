@@ -37,9 +37,16 @@ func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
+	followData, err := app.Models.Follows.GetFollowData(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
 	env := envelope{"user": &data.UserPublic{
-		ID:       user.ID,
-		Username: user.Username,
+		ID:         user.ID,
+		Username:   user.Username,
+		FollowData: followData,
 	}}
 
 	jsonhttp.WriteJSON(w, http.StatusAccepted, env, nil)
