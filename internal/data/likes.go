@@ -82,6 +82,29 @@ func (m *LikeModel) Dislike(userID, postID int64) error {
 	return nil
 }
 
+func (m *LikeModel) IsLikedBy(userID, postID int64) (bool, error) {
+	var hasLiked bool
+	query := `
+	SELECT EXISTS (
+		SELECT 1
+		FROM likes
+		WHERE user_id = $1 AND post_id = $2
+	) as has_liked;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{userID, postID}
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&hasLiked)
+	if err != nil {
+		return false, err
+	}
+
+	return hasLiked, nil
+}
+
 func (m *LikeModel) ListLikesFromPost(
 	postID int64,
 	pagination Pagination,

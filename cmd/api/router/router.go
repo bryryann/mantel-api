@@ -81,4 +81,5 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedDelete("/v1/posts/:post_id/likes", httpCompatible(ctx, dislikePost), ctx)
 	Get("/v1/posts/:post_id/likes", listLikesOnPost)
 	Get("/v1/posts/:post_id/likes/count", countLikesFromPost)
+	Get("/v1/users/:user_id/liked/:post_id", hasUserLiked)
 }

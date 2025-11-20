@@ -106,6 +106,37 @@ func dislikePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
+func hasUserLiked(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	userIDParam := ps.ByName("user_id")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	postIDParam := ps.ByName("post_id")
+	postID, err := strconv.Atoi(postIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	hasLiked, err := app.Models.Likes.IsLikedBy(int64(userID), int64(postID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	jsonResponse := envelope{"has_liked": hasLiked}
+	err = jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
 func listLikesOnPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
