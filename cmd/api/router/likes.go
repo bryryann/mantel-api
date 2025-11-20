@@ -47,6 +47,7 @@ func likePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if like == nil {
 		jsonResponse := envelope{
 			"message": "post already liked",
+			"like":    nil,
 		}
 
 		err = jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
@@ -57,7 +58,8 @@ func likePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	jsonResponse := envelope{
-		"like": like,
+		"message": nil,
+		"like":    like,
 	}
 	err = jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
 	if err != nil {
