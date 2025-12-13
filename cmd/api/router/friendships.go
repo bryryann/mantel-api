@@ -161,6 +161,37 @@ func patchPendingFriendRequest(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 }
 
+func getFriendshipStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	userIDParam := ps.ByName("user_id")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	friendIDParam := ps.ByName("friend_id")
+	friendID, err := strconv.Atoi(friendIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	status, err := app.Models.Friendships.GetFriendshipStatus(int64(userID), int64(friendID))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	jsonResponse := envelope{"friendship_status": status}
+	err = jsonhttp.WriteJSON(w, http.StatusAccepted, jsonResponse, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
 func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 	app := app.Get()
 	res := responses.Get()

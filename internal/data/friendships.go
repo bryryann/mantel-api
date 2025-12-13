@@ -110,6 +110,34 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 	return nil
 }
 
+func (m FriendshipModel) GetFriendshipStatus(userID, friendID int64) (string, error) {
+	var status string
+	query := `
+		SELECT COALESCE(
+			(
+				SELECT status
+				FROM friendships
+				WHERE LEAST(sender_id, receiver_id)
+					  = LEAST($1::int, $2::int)
+				  AND GREATEST(sender_id, receiver_id)
+					  = GREATEST($1::int, $2::int)
+				LIMIT 1
+			),
+			'none'
+		) AS status;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, userID, friendID).Scan(&status)
+	if err != nil {
+		return "", err
+	}
+
+	return status, nil
+}
+
 func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
 	exists, err := friendshipRequestExists(m.DB, fs)
 	if err != nil {
