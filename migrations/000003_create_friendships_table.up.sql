@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS friendships (
     version INTEGER NOT NULL DEFAULT 1,
 
     CHECK (sender_id <> receiver_id)
-    UNIQUE (LEAST(sender_id, receiver_id), GREATEST(sender_id, receiver_id))
 );
 
 CREATE OR REPLACE FUNCTION update_friendship_version()

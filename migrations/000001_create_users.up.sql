@@ -6,6 +6,7 @@
 -- 4. email: A unique case-insensitive text field that cannot be null.
 -- 5. password_hash: A bytea field for storing hashed passwords, cannot be null.
 -- 6. version: An integer field with a default value of 1.
+CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TABLE IF NOT EXISTS users (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -16,3 +17,5 @@ CREATE TABLE IF NOT EXISTS users (
     version integer NOT NULL DEFAULT 1
 );
 
+CREATE UNIQUE INDEX users_email_lower_unique
+ON users (LOWER(email));
