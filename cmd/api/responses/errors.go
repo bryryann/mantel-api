@@ -49,6 +49,11 @@ func (res *Responses) BadRequestResponse(w http.ResponseWriter, r *http.Request,
 	res.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
 }
 
+// ConflictResponse sends a 409 Conflict response with the provided error message.
+func (res *Responses) ConflictResponse(w http.ResponseWriter, r *http.Request, err error) {
+	res.ErrorResponse(w, r, http.StatusConflict, err.Error())
+}
+
 // FailedValidationResponse sends a 422 Unprocessable Entity response with the provided validation errors.
 func (res *Responses) FailedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	res.ErrorResponse(w, r, http.StatusUnprocessableEntity, errors)

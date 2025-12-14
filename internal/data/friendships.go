@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	ErrFriendshipRequestToSelf = errors.New("cannot send friend request to yourself")
-	ErrNoSuchRequest           = errors.New("the friend request does not exist")
-	ErrInvalidFriendshipStatus = errors.New("given status is not valid for friendships")
+	ErrFriendshipRequestToSelf    = errors.New("cannot send friend request to yourself")
+	ErrNoSuchRequest              = errors.New("the friend request does not exist")
+	ErrInvalidFriendshipStatus    = errors.New("given status is not valid for friendships")
+	ErrFriendRequestAlreadyExists = errors.New("friendship request already exists")
 )
 
 type FriendshipStatus string
@@ -93,8 +94,8 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 	query := `
 		INSERT INTO friendships (sender_id, receiver_id)
 		VALUES ($1, $2)
-		RETURNING created_at, status
 		ON CONFLICT (sender_id, receiver_id) DO NOTHING
+		RETURNING created_at, status
 	`
 
 	args := []any{fs.SenderID, fs.ReceiverID}
@@ -104,6 +105,9 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&fs.CreatedAt, &fs.Status)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrFriendRequestAlreadyExists
+		}
 		return err
 	}
 

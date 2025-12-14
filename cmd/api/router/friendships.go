@@ -90,6 +90,8 @@ func sendFriendRequest(w http.ResponseWriter, r *http.Request) {
 		switch err {
 		case data.ErrFriendshipRequestToSelf:
 			res.BadRequestResponse(w, r, err)
+		case data.ErrFriendRequestAlreadyExists:
+			res.ConflictResponse(w, r, err)
 		default:
 			res.ServerErrorResponse(w, r, err)
 		}
