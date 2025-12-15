@@ -114,6 +114,45 @@ func (m FriendshipModel) SendRequest(fs *Friendship) error {
 	return nil
 }
 
+func (m FriendshipModel) DeleteRequest(requestID, userID int64, operation string) (int, error) {
+	var query string
+	if operation == "reject" {
+		query = `
+		DELETE FROM friendships
+		WHERE id = $1
+		  AND receiver_id = $2
+		  AND status = 'pending';
+		`
+	} else {
+		query = `
+		DELETE FROM friendships
+		WHERE id = $1
+		  AND sender_id = $2
+		  AND status = 'pending';
+		`
+	}
+
+	args := []any{requestID, userID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	if rowsAffected > 0 {
+		return 1, nil
+	}
+	return 0, nil
+}
+
 func (m FriendshipModel) GetFriendshipStatus(userID, friendID int64) (string, error) {
 	var status string
 	query := `
@@ -183,7 +222,7 @@ func (m FriendshipModel) GetSentPendingRequests(
 	pagination Pagination,
 ) ([]Friendship, error) {
 	query := `
-		SELECT sender_id, receiver_id, created_at, status
+		SELECT id, sender_id, receiver_id, created_at, status
 		FROM friendships
 		WHERE sender_id = $1 AND status = 'pending'
 		LIMIT $2 OFFSET $3`
@@ -203,7 +242,7 @@ func (m FriendshipModel) GetSentPendingRequests(
 	for rows.Next() {
 		var f Friendship
 
-		err = rows.Scan(&f.SenderID, &f.ReceiverID, &f.CreatedAt, &f.Status)
+		err = rows.Scan(&f.ID, &f.SenderID, &f.ReceiverID, &f.CreatedAt, &f.Status)
 		if err != nil {
 			return nil, err
 		}
@@ -223,7 +262,7 @@ func (m FriendshipModel) GetReceivedPendingRequests(
 	pagination Pagination,
 ) ([]Friendship, error) {
 	query := `
-		SELECT sender_id, receiver_id, created_at, status
+		SELECT id, sender_id, receiver_id, created_at, status
 		FROM friendships
 		WHERE receiver_id = $1 AND status = 'pending'
 		LIMIT $2 OFFSET $3`
@@ -243,7 +282,7 @@ func (m FriendshipModel) GetReceivedPendingRequests(
 	for rows.Next() {
 		var f Friendship
 
-		err = rows.Scan(&f.SenderID, &f.ReceiverID, &f.CreatedAt, &f.Status)
+		err = rows.Scan(&f.ID, &f.SenderID, &f.ReceiverID, &f.CreatedAt, &f.Status)
 		if err != nil {
 			return nil, err
 		}
