@@ -182,15 +182,6 @@ func (m FriendshipModel) GetFriendshipStatus(userID, friendID int64) (string, er
 }
 
 func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
-	exists, err := friendshipRequestExists(m.DB, fs)
-	if err != nil {
-		return nil, err
-	}
-
-	if !exists {
-		return nil, ErrNoSuchRequest
-	}
-
 	query := `
 		UPDATE friendships
 		SET status = $1, updated_at = $3
@@ -208,8 +199,15 @@ func (m FriendshipModel) PatchFriendship(fs *Friendship) (*Friendship, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err = m.DB.QueryRowContext(ctx, query, args...).Scan(&patched.SenderID, &patched.UpdatedAt, &patched.CreatedAt)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&patched.SenderID,
+		&patched.UpdatedAt,
+		&patched.CreatedAt,
+	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoSuchRequest
+		}
 		return nil, err
 	}
 
@@ -295,25 +293,4 @@ func (m FriendshipModel) GetReceivedPendingRequests(
 	}
 
 	return requests, nil
-}
-
-func friendshipRequestExists(db *sql.DB, fs *Friendship) (bool, error) {
-	checkQuery := `
-		SELECT COUNT(*) FROM friendships
-		WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var count int
-	err := db.QueryRowContext(ctx, checkQuery, fs.SenderID, fs.ReceiverID).Scan(&count)
-	if err != nil {
-		return false, err
-	}
-
-	if count == 0 {
-		return false, nil
-	}
-	return true, nil
 }

@@ -65,7 +65,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 	ProtectedGet("/v1/friend-requests", listPendingRequests, ctx)
 	ProtectedPost("/v1/friend-requests", sendFriendRequest, ctx)
 	ProtectedDelete("/v1/friend-requests/:request_id/reject", httpCompatible(ctx, rejectFriendRequest), ctx)
-	ProtectedPatch("/v1/friend-requests/:id", httpCompatible(ctx, patchPendingFriendRequest), ctx)
+	ProtectedPut("/v1/friend-requests/:id", httpCompatible(ctx, patchPendingFriendRequest), ctx)
 
 	ProtectedGet("/v1/users/:user_id/friends", httpCompatible(ctx, getFriendsById), ctx)
 	Get("/v1/users/:user_id/friends/:friend_id", getFriendshipStatus)
