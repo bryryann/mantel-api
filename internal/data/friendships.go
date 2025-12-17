@@ -153,6 +153,35 @@ func (m FriendshipModel) DeleteRequest(requestID, userID int64, operation string
 	return 0, nil
 }
 
+func (m FriendshipModel) Unfriend(requestID, userID int64) (int, error) {
+	query := `
+		DELETE FROM friendships
+		WHERE id = $1
+			AND status = 'accepted'
+			AND ($2 = sender_id OR $2 = receiver_id);
+	`
+
+	args := []any{requestID, userID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	if rowsAffected > 0 {
+		return 1, nil
+	}
+	return 0, nil
+}
+
 func (m FriendshipModel) GetFriendshipStatus(userID, friendID int64) (string, error) {
 	var status string
 	query := `

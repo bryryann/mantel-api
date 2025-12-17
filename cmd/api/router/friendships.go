@@ -189,6 +189,32 @@ func rejectFriendRequest(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	}
 }
 
+func unfriend(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	requestIDParam := ps.ByName("request_id")
+	requestID, err := strconv.Atoi(requestIDParam)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	status, err := app.Models.Friendships.Unfriend(int64(requestID), user.ID)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	jsonResponse := envelope{"status": status}
+	err = jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
+
 func getFriendshipStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
 	res := responses.Get()
