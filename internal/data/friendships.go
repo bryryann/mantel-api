@@ -182,6 +182,42 @@ func (m FriendshipModel) Unfriend(requestID, userID int64) (int, error) {
 	return 0, nil
 }
 
+func (m FriendshipModel) GetFriendship(userID, friendID int64) (*Friendship, error) {
+	var fs Friendship
+	query := `
+		SELECT id, sender_id, receiver_id, created_at, updated_at, status, version
+		FROM friendships
+		WHERE
+			(sender_id = $1 AND receiver_id = $2)
+			OR
+			(sender_id = $2 AND receiver_id = $1)
+		LIMIT 1;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{userID, friendID}
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&fs.ID,
+		&fs.SenderID,
+		&fs.ReceiverID,
+		&fs.CreatedAt,
+		&fs.UpdatedAt,
+		&fs.Status,
+		&fs.Version,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	return &fs, nil
+}
+
 func (m FriendshipModel) GetFriendshipStatus(userID, friendID int64) (string, error) {
 	var status string
 	query := `
