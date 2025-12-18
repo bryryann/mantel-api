@@ -237,11 +237,11 @@ func getFriendship(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	if err != nil {
 		switch err {
 		case data.ErrRecordNotFound:
-			res.NotFoundResponse(w, r)
+			fs = nil
 		default:
 			res.ServerErrorResponse(w, r, err)
+			return
 		}
-		return
 	}
 
 	jsonResponse := envelope{"friendship": fs}
