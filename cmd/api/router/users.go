@@ -43,10 +43,21 @@ func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	env := envelope{"user": &data.UserPublic{
-		ID:         user.ID,
-		Username:   user.Username,
+	friendsCount, err := app.Models.Friendships.CountFriends(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	userData := data.UserData{
 		FollowData: followData,
+		Friends:    friendsCount,
+	}
+
+	env := envelope{"user": &data.UserPublic{
+		ID:       user.ID,
+		Username: user.Username,
+		UserData: userData,
 	}}
 
 	jsonhttp.WriteJSON(w, http.StatusAccepted, env, nil)

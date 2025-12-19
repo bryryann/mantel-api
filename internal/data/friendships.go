@@ -218,6 +218,28 @@ func (m FriendshipModel) GetFriendship(userID, friendID int64) (*Friendship, err
 	return &fs, nil
 }
 
+func (m FriendshipModel) CountFriends(userID int64) (int, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM friendships
+		WHERE
+			status = 'accepted'
+			AND
+			(sender_id = $1 OR receiver_id = $1)
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	err := m.DB.QueryRowContext(ctx, query, userID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (m FriendshipModel) GetFriendshipStatus(userID, friendID int64) (string, error) {
 	var status string
 	query := `
