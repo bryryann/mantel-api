@@ -86,6 +86,23 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		users = []data.UserPublic{}
 	}
 
+	for idx := range users {
+		followData, err := app.Models.Follows.GetFollowData(users[idx].ID)
+		if err != nil {
+			res.ServerErrorResponse(w, r, err)
+			return
+		}
+
+		friendsCount, err := app.Models.Friendships.CountFriends(users[idx].ID)
+		if err != nil {
+			res.ServerErrorResponse(w, r, err)
+			return
+		}
+
+		users[idx].UserData.FollowData = followData
+		users[idx].UserData.Friends = friendsCount
+	}
+
 	jsonResponse := envelope{
 		"users": users,
 		"meta": map[string]any{
