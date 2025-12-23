@@ -49,7 +49,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 	Get("/v1/healthcheck", httprouterCompatible(ctx, healthCheck))
 
 	// user and authentication
-	ProtectedGet("/v1/users", getAuthUser, ctx)
+	Get("/v1/users", searchUsers)
 	Get("/v1/users/:user_id", getUserByID)
 	Post("/v1/users", httprouterCompatible(ctx, registerUser))
 	Post("/v1/tokens/authentication", httprouterCompatible(ctx, authenticateToken))

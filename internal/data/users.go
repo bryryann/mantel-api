@@ -199,6 +199,53 @@ func (m UserModel) GetByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
+func (m UserModel) SearchUsers(
+	search string,
+	pagination Pagination,
+) ([]UserPublic, error) {
+	query := `
+		SELECT id, username
+		FROM users
+		WHERE username ILIKE '%' || $1 || '%'
+		ORDER BY
+			CASE
+				WHEN username ILIKE $1 THEN 0
+				WHEN username ILIKE $1 || '%' THEN 1
+				ELSE 2
+			END,
+			similarity(username, $1) DESC,
+			username
+		LIMIT $2 OFFSET $3
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{search, pagination.PageSize, pagination.Offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []UserPublic
+	for rows.Next() {
+		var u UserPublic
+		if err := rows.Scan(&u.ID, &u.Username); err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 // Update modifies an existing user record in the database with new data.
 func (m UserModel) Update(user *User) error {
 	query := `

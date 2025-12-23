@@ -6,20 +6,13 @@ import (
 	"strconv"
 
 	"github.com/bryryann/mantel/backend/cmd/api/app"
+	"github.com/bryryann/mantel/backend/cmd/api/helpers"
 	"github.com/bryryann/mantel/backend/cmd/api/jsonhttp"
 	"github.com/bryryann/mantel/backend/cmd/api/responses"
 	"github.com/bryryann/mantel/backend/internal/data"
 	"github.com/bryryann/mantel/backend/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
-
-func getAuthUser(w http.ResponseWriter, r *http.Request) {
-	app := app.Get()
-
-	user := app.Context.GetUser(r)
-
-	jsonhttp.WriteJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
-}
 
 func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := app.Get()
@@ -61,6 +54,50 @@ func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}}
 
 	jsonhttp.WriteJSON(w, http.StatusAccepted, env, nil)
+}
+
+func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	app := app.Get()
+	res := responses.Get()
+
+	query := r.URL.Query()
+
+	searchQuery := query.Get("q")
+	page := helpers.ParseIntOrDefault(query.Get("page"), 1)
+	pageSize := helpers.ParseIntOrDefault(query.Get("page_size"), 20)
+
+	if searchQuery == "" {
+		res.BadRequestResponse(w, r, errors.New("must provide search query parameter"))
+		return
+	}
+
+	paginationData := data.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+	}
+
+	users, err := app.Models.Users.SearchUsers(searchQuery, paginationData)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if users == nil {
+		users = []data.UserPublic{}
+	}
+
+	jsonResponse := envelope{
+		"users": users,
+		"meta": map[string]any{
+			"page":      page,
+			"page_size": pageSize,
+		},
+	}
+
+	err = jsonhttp.WriteJSON(w, http.StatusOK, jsonResponse, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
 }
 
 // registerUser handles the HTTP request for registering a new user.
