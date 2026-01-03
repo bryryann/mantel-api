@@ -28,6 +28,7 @@ type Post struct {
 func (p Post) ToPublic() any {
 	return PostPublic{
 		ID:        p.ID,
+		UserID:    p.UserID,
 		Content:   p.Content,
 		CreatedAt: p.CreatedAt,
 	}
@@ -35,6 +36,7 @@ func (p Post) ToPublic() any {
 
 type PostPublic struct {
 	ID        int64     `json:"id"`
+	UserID    int64     `json:"user_id"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -124,7 +126,7 @@ func (m PostModel) SelectAllFromUser(
 	}
 
 	query := fmt.Sprintf(`
-		SELECT id, content, created_at
+		SELECT id, user_id, content, created_at
 		FROM posts
 		WHERE user_id = $1
 		ORDER BY %s
@@ -145,7 +147,7 @@ func (m PostModel) SelectAllFromUser(
 	var posts []PostPublic
 	for rows.Next() {
 		var p PostPublic
-		if err := rows.Scan(&p.ID, &p.Content, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Content, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		posts = append(posts, p)
