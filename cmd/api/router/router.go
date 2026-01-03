@@ -86,4 +86,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 	Get("/v1/posts/:post_id/likes", listLikesOnPost)
 	Get("/v1/posts/:post_id/likes/count", countLikesFromPost)
 	Get("/v1/users/:user_id/liked/:post_id", hasUserLiked)
+
+	// feed
+	ProtectedGet("/v1/feed", getFeed, ctx)
 }
