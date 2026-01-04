@@ -53,6 +53,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 	Get("/v1/users/:user_id", getUserByID)
 	Post("/v1/users", httprouterCompatible(ctx, registerUser))
 	Post("/v1/tokens/authentication", httprouterCompatible(ctx, authenticateToken))
+	ProtectedPatch("/v1/users", updateUser, ctx)
 
 	// follows
 	Get("/v1/users/:user_id/followers", listUserFollowers)

@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/bryryann/mantel/backend/internal/mapper"
 	"github.com/bryryann/mantel/backend/internal/validator"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -250,7 +251,10 @@ func (m UserModel) SearchUsers(
 func (m UserModel) Update(user *User) error {
 	query := `
 		UPDATE users
-		SET username = $1, email = $2, password_hash = $3, version = version + 1
+		SET username = $1,
+		    email = $2,
+		    password_hash = $3,
+		    version = version + 1
 		WHERE id = $4 AND version = $5
 		RETURNING version`
 
@@ -267,15 +271,17 @@ func (m UserModel) Update(user *User) error {
 
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Version)
 	if err != nil {
-		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return ErrDuplicateEmail
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
-			return ErrDuplicateUsername
-		// TODO: Add ErrEditConflict custom error.
-		default:
-			return err
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+			switch pqErr.Constraint {
+			case "users_email_key":
+				return ErrDuplicateEmail
+			case "users_username_key":
+				return ErrDuplicateUsername
+			}
 		}
+
+		return err
 	}
 
 	return nil

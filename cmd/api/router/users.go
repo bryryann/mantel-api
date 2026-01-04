@@ -172,3 +172,65 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		res.ServerErrorResponse(w, r, err)
 	}
 }
+
+func updateUser(w http.ResponseWriter, r *http.Request) {
+	app := app.Get()
+	res := responses.Get()
+
+	user := app.Context.GetUser(r)
+
+	var input struct {
+		Username *string `json:"username"`
+		Password *string `json:"password"`
+	}
+
+	err := jsonhttp.ReadJSON(w, r, &input)
+	if err != nil {
+		res.BadRequestResponse(w, r, err)
+		return
+	}
+
+	if input.Username == nil && input.Password == nil {
+		res.BadRequestResponse(w, r, errors.New("no fields provided"))
+		return
+	}
+
+	patchedUser := &data.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Version:   user.Version,
+		Password:  user.Password,
+		CreatedAt: user.CreatedAt,
+	}
+
+	if input.Username != nil {
+		patchedUser.Username = *input.Username
+	}
+
+	if input.Password != nil {
+		err = patchedUser.Password.Set(*input.Password)
+		if err != nil {
+			res.BadRequestResponse(w, r, err)
+			return
+		}
+	}
+
+	err = app.Models.Users.Update(patchedUser)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
+			res.ConflictResponse(w, r, err)
+		case errors.Is(err, data.ErrDuplicateUsername):
+			res.ConflictResponse(w, r, err)
+		default:
+			res.ServerErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = jsonhttp.WriteJSON(w, http.StatusNoContent, nil, nil)
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+}
