@@ -45,8 +45,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 	httprouterCompatible := helpers.AdaptHttpRouterHandle
 	httpCompatible := helpers.AdaptHttpHandlerFunc
 
-	// healthcheck
-	Get("/v1/healthcheck", httprouterCompatible(ctx, healthCheck))
+	Get("/health", httprouterCompatible(ctx, healthCheck))
 
 	// user and authentication
 	Get("/v1/users", searchUsers)

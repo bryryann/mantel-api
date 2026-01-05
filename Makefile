@@ -18,12 +18,12 @@ db/migration:
 .PHONY: db/up
 db/up:
 	@echo 'Setting up migrations...'
-	migrate -path ./migrations -database ${MANTEL_DB_DSN} up
+	migrate -path ./migrations -database ${DATABASE_URL} up
 
 .PHONY: db/down
 db/down:
 	@echo 'Setting up migrations...'
-	migrate -path ./migrations -database ${MANTEL_DB_DSN} down
+	migrate -path ./migrations -database ${DATABASE_URL} down
 
 .PHONY: test
 test:

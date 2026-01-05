@@ -39,7 +39,7 @@ func Load() *Configuration {
 		}
 
 		// db
-		dsn := helpers.GetEnvString("MANTEL_DB_DSN", "")
+		dsn := helpers.GetEnvString("DATABASE_URL", "")
 		if dsn == "" {
 			log.Fatal("Empty database dsn string\n")
 		}

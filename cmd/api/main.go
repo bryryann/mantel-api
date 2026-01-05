@@ -32,7 +32,7 @@ func init() {
 func main() {
 	fmt.Println(ascii)
 
-	dsn := helpers.GetEnvString("MANTEL_DB_DSN", "")
+	dsn := helpers.GetEnvString("DATABASE_URL", "")
 	if dsn == "" {
 		panic("invalid db dsn\n")
 	}
@@ -60,10 +60,24 @@ func startServer() {
 	baseRouter := router.SetupRouter(app.Context, app.Models)
 
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{helpers.GetEnvString("CLIENT_API", "http://localhost:5173")},
+		AllowedOrigins: []string{
+			"http://localhost:5173",
+			helpers.GetEnvString("CLIENT_API", ""),
+		},
 		AllowCredentials: true,
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{
+			"Content-Type",
+			"Authorization",
+		},
+		MaxAge: 300,
 	}).Handler(baseRouter)
 
 	srv := &http.Server{
