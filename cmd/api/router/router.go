@@ -89,4 +89,7 @@ func InitializeRouter(ctx *appcontext.Context) {
 
 	// feed
 	ProtectedGet("/v1/feed", getFeed, ctx)
+
+	// profile
+	ProtectedPatch("/v1/profile/bio", updateBio, ctx)
 }
