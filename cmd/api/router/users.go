@@ -167,6 +167,11 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = application.Models.Bios.Insert(user, "")
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+	}
+
 	err = jsonhttp.WriteJSON(w, http.StatusCreated, envelope{"user": user}, nil)
 	if err != nil {
 		res.ServerErrorResponse(w, r, err)
