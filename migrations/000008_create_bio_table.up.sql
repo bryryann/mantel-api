@@ -22,3 +22,9 @@ CREATE TRIGGER trigger_update_bio_version
 BEFORE UPDATE ON bios
 FOR EACH ROW
 EXECUTE FUNCTION update_bio_version();
+
+INSERT INTO bios (user_id, content)
+SELECT u.id, ''
+FROM users u
+LEFT JOIN bios b ON b.user_id = u.id
+WHERE b.user_id IS NULL;
