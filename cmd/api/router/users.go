@@ -42,15 +42,22 @@ func getUserByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	userData := data.UserData{
+	bio, err := app.Models.Bios.GetByUserID(int64(id))
+	if err != nil {
+		res.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	profileData := data.ProfileData{
 		FollowData: followData,
 		Friends:    friendsCount,
+		Bio:        bio.Content,
 	}
 
 	env := envelope{"user": &data.UserPublic{
-		ID:       user.ID,
-		Username: user.Username,
-		UserData: userData,
+		ID:          user.ID,
+		Username:    user.Username,
+		ProfileData: profileData,
 	}}
 
 	jsonhttp.WriteJSON(w, http.StatusAccepted, env, nil)
@@ -99,8 +106,15 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		}
 
-		users[idx].UserData.FollowData = followData
-		users[idx].UserData.Friends = friendsCount
+		bio, err := app.Models.Bios.GetByUserID(users[idx].ID)
+		if err != nil {
+			res.ServerErrorResponse(w, r, err)
+			return
+		}
+
+		users[idx].ProfileData.FollowData = followData
+		users[idx].ProfileData.Friends = friendsCount
+		users[idx].ProfileData.Bio = bio.Content
 	}
 
 	jsonResponse := envelope{
